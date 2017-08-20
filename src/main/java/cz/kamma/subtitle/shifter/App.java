@@ -11,9 +11,9 @@ import java.util.ArrayList;
 
 public class App {
 
-	private ArrayList<SubtitleLine> readFile(String filename, String encoding, String format) throws Exception {
-		ArrayList<SubtitleLine> lines = new ArrayList<SubtitleLine>();
-
+	ArrayList<SubtitleLine> lines = new ArrayList<SubtitleLine>();
+	
+	public void readFile(String filename, String encoding, String format) throws Exception {
 		Reader reader = new InputStreamReader(new FileInputStream(filename), encoding);
 		BufferedReader br = new BufferedReader(reader);
 		
@@ -37,10 +37,9 @@ public class App {
 		}
 
 		br.close();
-		return lines;
 	}
 
-	private void writeFile(ArrayList<SubtitleLine> lines, String filename, String encoding, String format) throws Exception {
+	public void writeFile(String filename, String encoding, String format) throws Exception {
 		Writer writer = new OutputStreamWriter(new FileOutputStream(filename), encoding);
 
 		for (SubtitleLine sl:lines) {
@@ -51,7 +50,7 @@ public class App {
 		writer.close();
 	}
 	
-	private static void applyShiftMillis(ArrayList<SubtitleLine> lines, int shift) {
+	public void applyShiftMillis(int shift) {
 		for (SubtitleLine sl:lines) {
 			sl.applyShiftMillis(shift);
 		}
@@ -63,9 +62,16 @@ public class App {
 		String format = args[2];
 		int shift = Integer.parseInt(args[3]);
 		App a = new App();
-		ArrayList<SubtitleLine> lines = a.readFile(filename, encoding, format);
-		System.out.println(lines);
-		applyShiftMillis(lines, shift);
-		a.writeFile(lines, filename+".new", encoding, format);
+		a.readFile(filename, encoding, format);
+		a.applyShiftMillis(shift);
+		a.writeFile(filename+".new", encoding, format);
+	}
+
+	public String getFileText(String format) {
+		String tmp = "";
+		for (SubtitleLine sl:lines) {
+			tmp += sl.getLineFormated(format);
+		}
+		return tmp;
 	}
 }
