@@ -51,9 +51,9 @@ public class ShifterApp {
 	ArrayList<SubtitleLine> lines;
 	private JPanel panel_2;
 	private JLabel lblNewLabel;
-	private JComboBox formatCB;
+	private JComboBox<String> formatCB;
 	private JLabel lblNewLabel_1;
-	private JComboBox encodingCB;
+	private JComboBox<String> encodingCB;
 	private JPanel panel_3;
 	private JPanel panel_4;
 	private JPanel panel_5;
@@ -112,15 +112,14 @@ public class ShifterApp {
 		scrollPane.setColumnHeaderView(panel_2);
 
 		panel_3 = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) panel_3.getLayout();
 		panel_2.add(panel_3);
 
 		lblNewLabel = new JLabel("Subtitle format");
 		panel_3.add(lblNewLabel);
 
-		formatCB = new JComboBox();
+		formatCB = new JComboBox<String>();
 		panel_3.add(formatCB);
-		formatCB.setModel(new DefaultComboBoxModel(new String[] { "SRT" }));
+		formatCB.setModel(new DefaultComboBoxModel<String>(new String[] { "SRT" }));
 		formatCB.setSelectedIndex(0);
 		formatCB.addItemListener(new ItemListener() {
 
@@ -137,9 +136,9 @@ public class ShifterApp {
 		lblNewLabel_1 = new JLabel("Encoding");
 		panel_4.add(lblNewLabel_1);
 
-		encodingCB = new JComboBox();
+		encodingCB = new JComboBox<String>();
 		panel_4.add(encodingCB);
-		encodingCB.setModel(new DefaultComboBoxModel(new String[] { "CP1250", "CP1252", "UTF-8" }));
+		encodingCB.setModel(new DefaultComboBoxModel<String>(new String[] { "CP1250", "CP1252", "UTF-8" }));
 		encodingCB.setSelectedIndex(0);
 		encodingCB.addItemListener(new ItemListener() {
 
@@ -226,7 +225,7 @@ public class ShifterApp {
 		try {
 			shift = Integer.parseInt(shiftStr);
 			app.applyShiftMillis(shift);
-			textArea.setText(app.getFileText(formatCB.getSelectedItem().toString()));
+			textArea.setText(app.getFileText((String)formatCB.getSelectedItem()));
 			textArea.setCaretPosition(0);
 			saveFileBtn.setEnabled(true);
 		} catch (Exception ex) {
@@ -239,8 +238,8 @@ public class ShifterApp {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			try {
-				app.writeFile(file.getAbsolutePath(), encodingCB.getSelectedItem().toString(),
-						formatCB.getSelectedItem().toString());
+				app.writeFile(file.getAbsolutePath(), (String)encodingCB.getSelectedItem(),
+						(String)formatCB.getSelectedItem());
 				saveFileBtn.setEnabled(false);
 			} catch (Exception ex) {
 				JOptionPane.showMessageDialog(frmSubtitleshifter,
@@ -255,9 +254,9 @@ public class ShifterApp {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			try {
-				app.readFile(file.getAbsolutePath(), encodingCB.getSelectedItem().toString(),
-						formatCB.getSelectedItem().toString());
-				textArea.setText(app.getFileText(formatCB.getSelectedItem().toString()));
+				app.readFile(file.getAbsolutePath(), (String)encodingCB.getSelectedItem(),
+						(String)formatCB.getSelectedItem());
+				textArea.setText(app.getFileText((String)formatCB.getSelectedItem()));
 				textArea.setCaretPosition(0);
 				saveFileBtn.setEnabled(true);
 			} catch (Exception ex) {
