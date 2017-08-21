@@ -1,6 +1,7 @@
 package cz.kamma.subtitle.shifter.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -94,6 +95,7 @@ public class ShifterApp {
 		frmSubtitleshifter.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmSubtitleshifter.getContentPane()
 				.setLayout(new BoxLayout(frmSubtitleshifter.getContentPane(), BoxLayout.X_AXIS));
+		frmSubtitleshifter.setMinimumSize(new Dimension(585, 450));
 
 		panel = new JPanel();
 		frmSubtitleshifter.getContentPane().add(panel);
