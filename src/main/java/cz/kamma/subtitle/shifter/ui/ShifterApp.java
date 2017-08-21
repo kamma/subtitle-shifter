@@ -60,7 +60,7 @@ public class ShifterApp {
 	private JButton saveFileBtn;
 	private JPanel panel_6;
 	private JLabel lblNewLabel;
-	private JComboBox targetEncCB;
+	private JComboBox<String> targetEncCB;
 
 	/**
 	 * Launch the application.
@@ -92,11 +92,11 @@ public class ShifterApp {
 		app = new ShifterEngine();
 		frmSubtitleshifter = new JFrame();
 		frmSubtitleshifter.setTitle("SubtitleShifter");
-		frmSubtitleshifter.setBounds(100, 100, 660, 512);
+		frmSubtitleshifter.setBounds(100, 100, 850, 512);
 		frmSubtitleshifter.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmSubtitleshifter.getContentPane()
 				.setLayout(new BoxLayout(frmSubtitleshifter.getContentPane(), BoxLayout.X_AXIS));
-		frmSubtitleshifter.setMinimumSize(new Dimension(660, 512));
+		frmSubtitleshifter.setMinimumSize(new Dimension(850, 512));
 
 		panel = new JPanel();
 		frmSubtitleshifter.getContentPane().add(panel);
@@ -121,7 +121,7 @@ public class ShifterApp {
 						encodingCB = new JComboBox<String>();
 						panel_3.add(encodingCB);
 						encodingCB.setModel(new DefaultComboBoxModel<String>(Constants.ENCODING_TYPES));
-						encodingCB.setSelectedIndex(0);
+						encodingCB.setSelectedItem(Constants.DEFAULT_CHARSET);
 						encodingCB.addItemListener(new ItemListener() {
 
 							@Override
@@ -138,9 +138,9 @@ public class ShifterApp {
 		lblNewLabel = new JLabel("Target Encoding");
 		panel_4.add(lblNewLabel);
 		
-		targetEncCB = new JComboBox();
-		targetEncCB.setModel(new DefaultComboBoxModel(new String[] {"cdcd"}));
-		targetEncCB.setSelectedIndex(0);
+		targetEncCB = new JComboBox<String>();
+		targetEncCB.setModel(new DefaultComboBoxModel<String>(Constants.ENCODING_TYPES));
+		targetEncCB.setSelectedItem(Constants.DEFAULT_CHARSET);
 		panel_4.add(targetEncCB);
 
 		panel_5 = new JPanel();
