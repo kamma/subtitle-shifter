@@ -51,8 +51,6 @@ public class ShifterApp {
 
 	ArrayList<SubtitleLine> lines;
 	private JPanel panel_2;
-	private JLabel lblNewLabel;
-	private JComboBox<String> formatCB;
 	private JLabel lblNewLabel_1;
 	private JComboBox<String> encodingCB;
 	private JPanel panel_3;
@@ -61,6 +59,8 @@ public class ShifterApp {
 	private JButton openFileBtn;
 	private JButton saveFileBtn;
 	private JPanel panel_6;
+	private JLabel lblNewLabel;
+	private JComboBox targetEncCB;
 
 	/**
 	 * Launch the application.
@@ -92,11 +92,11 @@ public class ShifterApp {
 		app = new ShifterEngine();
 		frmSubtitleshifter = new JFrame();
 		frmSubtitleshifter.setTitle("SubtitleShifter");
-		frmSubtitleshifter.setBounds(100, 100, 603, 450);
+		frmSubtitleshifter.setBounds(100, 100, 660, 512);
 		frmSubtitleshifter.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmSubtitleshifter.getContentPane()
 				.setLayout(new BoxLayout(frmSubtitleshifter.getContentPane(), BoxLayout.X_AXIS));
-		frmSubtitleshifter.setMinimumSize(new Dimension(603, 450));
+		frmSubtitleshifter.setMinimumSize(new Dimension(660, 512));
 
 		panel = new JPanel();
 		frmSubtitleshifter.getContentPane().add(panel);
@@ -114,41 +114,34 @@ public class ShifterApp {
 
 		panel_3 = new JPanel();
 		panel_2.add(panel_3);
+		
+				lblNewLabel_1 = new JLabel("Source Encoding");
+				panel_3.add(lblNewLabel_1);
+				
+						encodingCB = new JComboBox<String>();
+						panel_3.add(encodingCB);
+						encodingCB.setModel(new DefaultComboBoxModel<String>(Constants.ENCODING_TYPES));
+						encodingCB.setSelectedIndex(0);
+						encodingCB.addItemListener(new ItemListener() {
 
-		lblNewLabel = new JLabel("Subtitle format");
-		panel_3.add(lblNewLabel);
-
-		formatCB = new JComboBox<String>();
-		panel_3.add(formatCB);
-		formatCB.setModel(new DefaultComboBoxModel<String>(Constants.SUBTITLE_FORMATS));
-		formatCB.setSelectedIndex(0);
-		formatCB.addItemListener(new ItemListener() {
-
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (app.isFileOpen())
-					saveFileBtn.setEnabled(true);
-			}
-		});
+							@Override
+							public void itemStateChanged(ItemEvent e) {
+								if (app.isFileOpen()) {
+									reloadFile();
+								}
+							}
+						});
 
 		panel_4 = new JPanel();
 		panel_2.add(panel_4);
-
-		lblNewLabel_1 = new JLabel("Encoding");
-		panel_4.add(lblNewLabel_1);
-
-		encodingCB = new JComboBox<String>();
-		panel_4.add(encodingCB);
-		encodingCB.setModel(new DefaultComboBoxModel<String>(Constants.ENCODING_TYPES));
-		encodingCB.setSelectedIndex(0);
-		encodingCB.addItemListener(new ItemListener() {
-
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if (app.isFileOpen())
-					saveFileBtn.setEnabled(true);
-			}
-		});
+		
+		lblNewLabel = new JLabel("Target Encoding");
+		panel_4.add(lblNewLabel);
+		
+		targetEncCB = new JComboBox();
+		targetEncCB.setModel(new DefaultComboBoxModel(new String[] {"cdcd"}));
+		targetEncCB.setSelectedIndex(0);
+		panel_4.add(targetEncCB);
 
 		panel_5 = new JPanel();
 		panel_2.add(panel_5);
@@ -220,17 +213,38 @@ public class ShifterApp {
 		mnFile.add(exitMenuItem);
 	}
 
+	protected void reloadFile() {
+		reloadFile(null);
+	}
+	
+	protected void reloadFile(String filename) {
+		try {
+			if (filename!=null && !"".equals(filename))
+				app.openFile(filename);
+			app.readFile((String) encodingCB.getSelectedItem(), Constants.FORMAT_TYPE_SRT);
+			textArea.setText(app.getFileText(Constants.FORMAT_TYPE_SRT));
+			textArea.setCaretPosition(0);
+			saveFileBtn.setEnabled(true);
+		} catch (Exception ex) {
+			JOptionPane.showMessageDialog(frmSubtitleshifter,
+					"Error occured while reading file.\nError: " + ex.getMessage(), "Cannot read file",
+					JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
 	protected void shiftApplyAction() {
 		String shiftStr = shiftTF.getText();
 		int shift = 0;
 		try {
 			shift = Integer.parseInt(shiftStr);
 			app.applyShiftMillis(shift);
-			textArea.setText(app.getFileText((String)formatCB.getSelectedItem()));
+			textArea.setText(app.getFileText(Constants.FORMAT_TYPE_SRT));
 			textArea.setCaretPosition(0);
 			saveFileBtn.setEnabled(true);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			JOptionPane.showMessageDialog(frmSubtitleshifter,
+					"Error occured while applying shift.\nError: " + ex.getMessage(), "Cannot shift subtitles",
+					JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -239,8 +253,8 @@ public class ShifterApp {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			try {
-				app.writeFile(file.getAbsolutePath(), (String)encodingCB.getSelectedItem(),
-						(String)formatCB.getSelectedItem());
+				app.writeFile(file.getAbsolutePath(), (String) targetEncCB.getSelectedItem(),
+						Constants.FORMAT_TYPE_SRT);
 				saveFileBtn.setEnabled(false);
 			} catch (Exception ex) {
 				JOptionPane.showMessageDialog(frmSubtitleshifter,
@@ -255,15 +269,13 @@ public class ShifterApp {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			try {
-				app.readFile(file.getAbsolutePath(), (String)encodingCB.getSelectedItem(),
-						(String)formatCB.getSelectedItem());
-				textArea.setText(app.getFileText((String)formatCB.getSelectedItem()));
-				textArea.setCaretPosition(0);
+				app.openFile(file.getAbsolutePath());
 			} catch (Exception ex) {
 				JOptionPane.showMessageDialog(frmSubtitleshifter,
 						"Error occured while opening the file.\nError: " + ex.getMessage(), "Cannot open file",
 						JOptionPane.ERROR_MESSAGE);
 			}
+			reloadFile();
 		}
 	}
 
