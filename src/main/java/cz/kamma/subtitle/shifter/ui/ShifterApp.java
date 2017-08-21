@@ -92,11 +92,11 @@ public class ShifterApp {
 		app = new ShifterEngine();
 		frmSubtitleshifter = new JFrame();
 		frmSubtitleshifter.setTitle("SubtitleShifter");
-		frmSubtitleshifter.setBounds(100, 100, 586, 441);
+		frmSubtitleshifter.setBounds(100, 100, 603, 450);
 		frmSubtitleshifter.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmSubtitleshifter.getContentPane()
 				.setLayout(new BoxLayout(frmSubtitleshifter.getContentPane(), BoxLayout.X_AXIS));
-		frmSubtitleshifter.setMinimumSize(new Dimension(585, 450));
+		frmSubtitleshifter.setMinimumSize(new Dimension(603, 450));
 
 		panel = new JPanel();
 		frmSubtitleshifter.getContentPane().add(panel);
@@ -259,7 +259,6 @@ public class ShifterApp {
 						(String)formatCB.getSelectedItem());
 				textArea.setText(app.getFileText((String)formatCB.getSelectedItem()));
 				textArea.setCaretPosition(0);
-				saveFileBtn.setEnabled(true);
 			} catch (Exception ex) {
 				JOptionPane.showMessageDialog(frmSubtitleshifter,
 						"Error occured while opening the file.\nError: " + ex.getMessage(), "Cannot open file",

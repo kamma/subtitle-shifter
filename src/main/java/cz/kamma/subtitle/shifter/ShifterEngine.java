@@ -11,9 +11,10 @@ import java.util.ArrayList;
 
 public class ShifterEngine {
 
-	ArrayList<SubtitleLine> lines = new ArrayList<SubtitleLine>();
+	ArrayList<SubtitleLine> lines;
 	
 	public void readFile(String filename, String encoding, String format) throws Exception {
+		lines = new ArrayList<SubtitleLine>();
 		Reader reader = new InputStreamReader(new FileInputStream(filename), encoding);
 		BufferedReader br = new BufferedReader(reader);
 		
