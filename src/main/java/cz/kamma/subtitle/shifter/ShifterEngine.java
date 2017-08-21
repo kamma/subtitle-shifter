@@ -74,4 +74,8 @@ public class ShifterEngine {
 		}
 		return tmp;
 	}
+
+	public boolean isFileOpen() {
+		return lines!=null && !lines.isEmpty();
+	}
 }
