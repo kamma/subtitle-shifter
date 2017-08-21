@@ -19,10 +19,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import cz.kamma.subtitle.shifter.App;
+import cz.kamma.subtitle.shifter.ShifterEngine;
 import cz.kamma.subtitle.shifter.SubtitleLine;
 
-public class Shifter {
+public class ShifterApp {
 
 	private JFrame frmSubtitleshifter;
 	private JPanel panel;
@@ -35,7 +35,7 @@ public class Shifter {
 	private JMenuItem mntmNewMenuItem;
 	private JMenuItem mntmSave;
 	private JMenuItem mntmExit;
-	private App app;
+	private ShifterEngine app;
 	private JScrollPane scrollPane;
 
 	final JFileChooser fc = new JFileChooser();
@@ -49,7 +49,7 @@ public class Shifter {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Shifter window = new Shifter();
+					ShifterApp window = new ShifterApp();
 					window.frmSubtitleshifter.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -61,7 +61,7 @@ public class Shifter {
 	/**
 	 * Create the application.
 	 */
-	public Shifter() {
+	public ShifterApp() {
 		initialize();
 	}
 
@@ -69,7 +69,7 @@ public class Shifter {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		app = new App();
+		app = new ShifterEngine();
 		frmSubtitleshifter = new JFrame();
 		frmSubtitleshifter.setTitle("SubtitleShifter");
 		frmSubtitleshifter.setBounds(100, 100, 532, 400);

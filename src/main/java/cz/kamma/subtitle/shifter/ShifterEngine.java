@@ -9,7 +9,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 
-public class App {
+public class ShifterEngine {
 
 	ArrayList<SubtitleLine> lines = new ArrayList<SubtitleLine>();
 	
@@ -61,7 +61,7 @@ public class App {
 		String encoding = args[1];
 		String format = args[2];
 		int shift = Integer.parseInt(args[3]);
-		App a = new App();
+		ShifterEngine a = new ShifterEngine();
 		a.readFile(filename, encoding, format);
 		a.applyShiftMillis(shift);
 		a.writeFile(filename+".new", encoding, format);

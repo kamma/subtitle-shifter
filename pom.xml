@@ -22,7 +22,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>cz.kamma.subtitle.shifter.ui.Shifter</mainClass>
+							<mainClass>cz.kamma.subtitle.shifter.ui.ShifterApp</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
