@@ -21,6 +21,10 @@ import javax.swing.JTextField;
 
 import cz.kamma.subtitle.shifter.ShifterEngine;
 import cz.kamma.subtitle.shifter.SubtitleLine;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.DefaultComboBoxModel;
+import java.awt.FlowLayout;
 
 public class ShifterApp {
 
@@ -28,8 +32,8 @@ public class ShifterApp {
 	private JPanel panel;
 	private JTextArea textArea;
 	private JPanel panel_1;
-	private JTextField textField;
-	private JButton btnNewButton;
+	private JTextField shiftTF;
+	private JButton applyShiftBtn;
 	private JMenuBar menuBar;
 	private JMenu mnFile;
 	private JMenuItem mntmNewMenuItem;
@@ -41,6 +45,13 @@ public class ShifterApp {
 	final JFileChooser fc = new JFileChooser();
 
 	ArrayList<SubtitleLine> lines;
+	private JPanel panel_2;
+	private JLabel lblNewLabel;
+	private JComboBox formatCB;
+	private JLabel lblNewLabel_1;
+	private JComboBox encodingCB;
+	private JPanel panel_3;
+	private JPanel panel_4;
 
 	/**
 	 * Launch the application.
@@ -85,19 +96,45 @@ public class ShifterApp {
 		scrollPane = new JScrollPane(textArea);
 		textArea.setEditable(false);
 		panel.add(scrollPane, BorderLayout.CENTER);
+		
+		panel_2 = new JPanel();
+		FlowLayout flowLayout_1 = (FlowLayout) panel_2.getLayout();
+		flowLayout_1.setAlignment(FlowLayout.LEFT);
+		scrollPane.setColumnHeaderView(panel_2);
+		
+		panel_3 = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panel_3.getLayout();
+		panel_2.add(panel_3);
+		
+		lblNewLabel = new JLabel("Subtitle format");
+		panel_3.add(lblNewLabel);
+		
+		formatCB = new JComboBox();
+		panel_3.add(formatCB);
+		formatCB.setModel(new DefaultComboBoxModel(new String[] {"Srt"}));
+		
+		panel_4 = new JPanel();
+		panel_2.add(panel_4);
+		
+		lblNewLabel_1 = new JLabel("Encoding");
+		panel_4.add(lblNewLabel_1);
+		
+		encodingCB = new JComboBox();
+		panel_4.add(encodingCB);
+		encodingCB.setModel(new DefaultComboBoxModel(new String[] {"CP1250", "CP1252", "UTF-8"}));
 
 		panel_1 = new JPanel();
 		panel.add(panel_1, BorderLayout.SOUTH);
 		panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.X_AXIS));
 
-		textField = new JTextField();
-		panel_1.add(textField);
-		textField.setColumns(10);
+		shiftTF = new JTextField();
+		panel_1.add(shiftTF);
+		shiftTF.setColumns(10);
 
-		btnNewButton = new JButton("Apply Shift");
-		btnNewButton.addActionListener(new ActionListener() {
+		applyShiftBtn = new JButton("Apply Shift");
+		applyShiftBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String shiftStr = textField.getText();
+				String shiftStr = shiftTF.getText();
 				int shift = 0;
 				try {
 					shift = Integer.parseInt(shiftStr);
@@ -109,7 +146,7 @@ public class ShifterApp {
 				}
 			}
 		});
-		panel_1.add(btnNewButton);
+		panel_1.add(applyShiftBtn);
 
 		menuBar = new JMenuBar();
 		frmSubtitleshifter.setJMenuBar(menuBar);
@@ -124,7 +161,7 @@ public class ShifterApp {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();
 					try {
-						app.readFile(file.getAbsolutePath(), "cp1250", "srt");
+						app.readFile(file.getAbsolutePath(), encodingCB.getSelectedItem().toString(), formatCB.getSelectedItem().toString());
 						textArea.setText(app.getFileText("srt"));
 						textArea.setCaretPosition(0);
 					} catch (Exception ex) {
@@ -142,7 +179,7 @@ public class ShifterApp {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();
 					try {
-						app.writeFile(file.getAbsolutePath(), "cp1250", "srt");
+						app.writeFile(file.getAbsolutePath(), encodingCB.getSelectedItem().toString(), formatCB.getSelectedItem().toString());
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
