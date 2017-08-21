@@ -34,9 +34,9 @@ public class SubtitleLine {
 	}
 	public void setTimeFromTo(String timeFromTo) throws Exception {
 		this.timeFromTo = timeFromTo;
-		String[] parts = timeFromTo.split(" --> ");
-		this.timeFrom = sdf.parse(parts[0]);
-		this.timeTo = sdf.parse(parts[1]);
+		String[] parts = timeFromTo.split(Constants.TIME_DELIMITTER_SRT);
+		this.timeFrom = sdf.parse(parts[0].trim());
+		this.timeTo = sdf.parse(parts[1].trim());
 	}
 	public String getText() {
 		return text;

@@ -27,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import cz.kamma.subtitle.shifter.Constants;
 import cz.kamma.subtitle.shifter.ShifterEngine;
 import cz.kamma.subtitle.shifter.SubtitleLine;
 
@@ -119,7 +120,7 @@ public class ShifterApp {
 
 		formatCB = new JComboBox<String>();
 		panel_3.add(formatCB);
-		formatCB.setModel(new DefaultComboBoxModel<String>(new String[] { "SRT" }));
+		formatCB.setModel(new DefaultComboBoxModel<String>(Constants.SUBTITLE_FORMATS));
 		formatCB.setSelectedIndex(0);
 		formatCB.addItemListener(new ItemListener() {
 
@@ -138,7 +139,7 @@ public class ShifterApp {
 
 		encodingCB = new JComboBox<String>();
 		panel_4.add(encodingCB);
-		encodingCB.setModel(new DefaultComboBoxModel<String>(new String[] { "CP1250", "CP1252", "UTF-8" }));
+		encodingCB.setModel(new DefaultComboBoxModel<String>(Constants.ENCODING_TYPES));
 		encodingCB.setSelectedIndex(0);
 		encodingCB.addItemListener(new ItemListener() {
 
