@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -38,7 +37,7 @@ public class ShifterApp {
 
   private JFrame frmSubtitleshifter;
   private JPanel panel;
-  private JList<SubtitleLine> textArea;
+  private JList<SubtitleLine> subList;
   private JPanel panel_1;
   private JTextField shiftTF;
   private JButton applyShiftBtn;
@@ -104,9 +103,9 @@ public class ShifterApp {
     frmSubtitleshifter.getContentPane().add(panel);
     panel.setLayout(new BorderLayout(0, 0));
 
-    textArea = new JList<>();
-    textArea.setCellRenderer(new MyListCellRenderer());
-    scrollPane = new JScrollPane(textArea);
+    subList = new JList<>();
+    subList.setCellRenderer(new MyListCellRenderer());
+    scrollPane = new JScrollPane(subList);
     panel.add(scrollPane, BorderLayout.CENTER);
 
     panel_2 = new JPanel();
@@ -224,7 +223,7 @@ public class ShifterApp {
       if (filename != null && !"".equals(filename))
         app.openFile(filename);
       app.readFile((String) encodingCB.getSelectedItem(), Constants.FORMAT_TYPE_SRT);
-      textArea.setListData(app.getLinesAsArray());
+      subList.setListData(app.getLinesAsArray());
       saveFileBtn.setEnabled(true);
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(frmSubtitleshifter, "Error occured while reading file.\nError: " + ex.getMessage(), "Cannot read file", JOptionPane.ERROR_MESSAGE);
@@ -237,7 +236,8 @@ public class ShifterApp {
     try {
       shift = Integer.parseInt(shiftStr);
       app.applyShiftMillis(shift);
-      textArea.setListData(app.getLinesAsArray());
+      //textArea.setListData(app.getLinesAsArray());
+      subList.repaint();
       saveFileBtn.setEnabled(true);
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(frmSubtitleshifter, "Error occured while applying shift.\nError: " + ex.getMessage(), "Cannot shift subtitles", JOptionPane.ERROR_MESSAGE);
