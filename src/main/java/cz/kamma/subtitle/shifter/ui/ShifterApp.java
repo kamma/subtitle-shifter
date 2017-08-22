@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -26,6 +28,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
@@ -33,7 +36,7 @@ import cz.kamma.subtitle.shifter.Constants;
 import cz.kamma.subtitle.shifter.ShifterEngine;
 import cz.kamma.subtitle.shifter.SubtitleLine;
 
-public class ShifterApp {
+public class ShifterApp implements MouseListener {
 
   private JFrame frmSubtitleshifter;
   private JPanel panel;
@@ -68,6 +71,7 @@ public class ShifterApp {
   private JTextField searchTF;
   private JButton searchBtn;
   private JLabel lblNewLabel_2;
+  private JPopupMenu jPopupMenu;
 
   /**
    * Launch the application.
@@ -92,24 +96,57 @@ public class ShifterApp {
     initialize();
   }
 
+  public void mousePressed(MouseEvent e) {
+    check(e);
+  }
+
+  public void mouseEntered(MouseEvent e) {
+    //check(e);
+  }
+  
+  public void mouseClicked(MouseEvent e) {
+    //check(e);
+  }
+
+  public void mouseExited(MouseEvent e) {
+    //check(e);
+  }
+  
+  public void mouseReleased(MouseEvent e) {
+    check(e);
+  }
+
+  public void check(MouseEvent e) {
+    if (e.isPopupTrigger()) { // if the event shows the menu
+      subList.setSelectedIndex(subList.locationToIndex(e.getPoint())); // select the item
+      if (subList.getSelectedIndex()>=0)
+        jPopupMenu.show(subList, e.getX(), e.getY()); // and show the menu
+    }
+  }
+
   /**
    * Initialize the contents of the frame.
    */
   private void initialize() {
     app = new ShifterEngine();
+    jPopupMenu = new JPopupMenu("Action");
+    jPopupMenu.add(new JMenuItem("Aplly shift behind"));
+    jPopupMenu.add(new JMenuItem("Aplly shift before"));
+    
     frmSubtitleshifter = new JFrame();
     frmSubtitleshifter.setTitle("SubtitleShifter");
     frmSubtitleshifter.setBounds(100, 100, 850, 512);
     frmSubtitleshifter.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frmSubtitleshifter.getContentPane().setLayout(new BoxLayout(frmSubtitleshifter.getContentPane(), BoxLayout.X_AXIS));
     frmSubtitleshifter.setMinimumSize(new Dimension(850, 512));
-
+    
     panel = new JPanel();
     frmSubtitleshifter.getContentPane().add(panel);
     panel.setLayout(new BorderLayout(0, 0));
 
     subList = new JList<>();
     subList.setCellRenderer(new MyListCellRenderer());
+    subList.addMouseListener(this);
     scrollPane = new JScrollPane(subList);
     panel.add(scrollPane, BorderLayout.CENTER);
 
@@ -244,11 +281,11 @@ public class ShifterApp {
   protected void search() {
     String searchStr = searchTF.getText();
     int index = app.search(searchStr);
-    if (index<0)
+    if (index < 0)
       JOptionPane.showMessageDialog(frmSubtitleshifter, "String not found", "Search result", JOptionPane.INFORMATION_MESSAGE);
     else
       subList.setSelectedIndex(index);
-    
+
   }
 
   protected void reloadFile() {
