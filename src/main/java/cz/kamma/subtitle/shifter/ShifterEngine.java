@@ -15,6 +15,7 @@ public class ShifterEngine {
 
   byte[] file;
   ArrayList<SubtitleLine> lines;
+  int searchIndex = 0;
 
   public void openFile(String filename) throws Exception {
     FileInputStream fis = new FileInputStream(filename);
@@ -97,5 +98,18 @@ public class ShifterEngine {
 
   public List<SubtitleLine> getLines() {
     return lines;
+  }
+
+  public int search(String searchStr) {
+
+    for (int i=searchIndex;i<lines.size();i++) {
+      searchIndex++;
+      SubtitleLine sl = lines.get(i);
+      if (sl.contains(searchStr))
+        return i;
+    }
+    
+    searchIndex = 0;
+    return -1;
   }
 }

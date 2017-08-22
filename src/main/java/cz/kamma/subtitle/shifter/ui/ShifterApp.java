@@ -63,6 +63,11 @@ public class ShifterApp {
   private JPanel panel_6;
   private JLabel lblNewLabel;
   private JComboBox<String> targetEncCB;
+  private JPanel panel_7;
+  private JPanel panel_8;
+  private JTextField searchTF;
+  private JButton searchBtn;
+  private JLabel lblNewLabel_2;
 
   /**
    * Launch the application.
@@ -155,8 +160,41 @@ public class ShifterApp {
     });
     panel_5.add(openFileBtn);
 
+    panel_1 = new JPanel();
+    panel.add(panel_1, BorderLayout.SOUTH);
+    panel_1.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+
+    panel_7 = new JPanel();
+    panel_1.add(panel_7);
+
+    lblNewLabel_2 = new JLabel("Shift (ms)");
+    panel_7.add(lblNewLabel_2);
+
+    shiftTF = new JTextField();
+
+    panel_7.add(shiftTF);
+    shiftTF.setColumns(10);
+
+    applyShiftBtn = new JButton("Apply Shift");
+    panel_7.add(applyShiftBtn);
+
+    panel_8 = new JPanel();
+    panel_1.add(panel_8);
+
+    searchTF = new JTextField();
+    panel_8.add(searchTF);
+    searchTF.setColumns(10);
+
+    searchBtn = new JButton("Search / Next");
+    searchBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent arg0) {
+        search();
+      }
+    });
+    panel_8.add(searchBtn);
+
     panel_6 = new JPanel();
-    panel_2.add(panel_6);
+    panel_1.add(panel_6);
 
     saveFileBtn = new JButton("Save Subtitles");
     saveFileBtn.setEnabled(false);
@@ -166,22 +204,11 @@ public class ShifterApp {
       }
     });
     panel_6.add(saveFileBtn);
-
-    panel_1 = new JPanel();
-    panel.add(panel_1, BorderLayout.SOUTH);
-    panel_1.setLayout(new BoxLayout(panel_1, BoxLayout.X_AXIS));
-
-    shiftTF = new JTextField();
-    panel_1.add(shiftTF);
-    shiftTF.setColumns(10);
-
-    applyShiftBtn = new JButton("Apply Shift");
     applyShiftBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         shiftApplyAction();
       }
     });
-    panel_1.add(applyShiftBtn);
 
     menuBar = new JMenuBar();
     frmSubtitleshifter.setJMenuBar(menuBar);
@@ -214,6 +241,16 @@ public class ShifterApp {
     mnFile.add(exitMenuItem);
   }
 
+  protected void search() {
+    String searchStr = searchTF.getText();
+    int index = app.search(searchStr);
+    if (index<0)
+      JOptionPane.showMessageDialog(frmSubtitleshifter, "String not found", "Search result", JOptionPane.INFORMATION_MESSAGE);
+    else
+      subList.setSelectedIndex(index);
+    
+  }
+
   protected void reloadFile() {
     reloadFile(null);
   }
@@ -236,7 +273,7 @@ public class ShifterApp {
     try {
       shift = Integer.parseInt(shiftStr);
       app.applyShiftMillis(shift);
-      //textArea.setListData(app.getLinesAsArray());
+      // textArea.setListData(app.getLinesAsArray());
       subList.repaint();
       saveFileBtn.setEnabled(true);
     } catch (Exception ex) {
@@ -278,7 +315,7 @@ public class ShifterApp {
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
       super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
       SubtitleLine sl = (SubtitleLine) value;
-      String labelText = "<html><body>" + sl.getLineNum() + "<br/>" + sl.getTimeFromTo() + "<br/>" + sl.getTextAsHTML()+"<br/></body></html>";
+      String labelText = "<html><body>" + sl.getLineNum() + "<br/>" + sl.getTimeFromTo() + "<br/>" + sl.getTextAsHTML() + "<br/></body></html>";
       setText(labelText);
 
       return this;

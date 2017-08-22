@@ -68,4 +68,8 @@ public class SubtitleLine {
   public String getTimeFromTo() {
     return sdf.format(timeFrom) + " --> " + sdf.format(timeTo);
   }
+
+  public boolean contains(String searchStr) {
+    return toString().contains(searchStr);
+  }
 }
