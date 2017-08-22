@@ -62,9 +62,17 @@ public class ShifterEngine {
     writer.close();
   }
 
-  public void applyShiftMillis(int shift) {
-    for (SubtitleLine sl : lines) {
-      sl.applyShiftMillis(shift);
+  public void applyShiftMillis(int shift, int index, boolean after) {
+    if (after) {
+      for (int i=index;i<lines.size();i++) {
+        SubtitleLine sl = lines.get(i);
+        sl.applyShiftMillis(shift);
+      }
+    } else {
+      for (int i=index;i>=0;i--) {
+        SubtitleLine sl = lines.get(i);
+        sl.applyShiftMillis(shift);
+      }
     }
   }
 
@@ -76,7 +84,7 @@ public class ShifterEngine {
     ShifterEngine a = new ShifterEngine();
     a.openFile(filename);
     a.readFile(encoding, format);
-    a.applyShiftMillis(shift);
+    a.applyShiftMillis(shift, 0, true);
     a.writeFile(filename + ".new", encoding, format);
   }
 

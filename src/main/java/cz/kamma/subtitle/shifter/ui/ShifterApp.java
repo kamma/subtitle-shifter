@@ -130,8 +130,24 @@ public class ShifterApp implements MouseListener {
   private void initialize() {
     app = new ShifterEngine();
     jPopupMenu = new JPopupMenu("Action");
-    jPopupMenu.add(new JMenuItem("Aplly shift behind"));
-    jPopupMenu.add(new JMenuItem("Aplly shift before"));
+    JMenuItem afterMenuItem = new JMenuItem("Apply shift after");
+    JMenuItem beforeMenuItem = new JMenuItem("Apply shift before");
+    afterMenuItem.addActionListener(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        applyShifAfter();        
+      }
+    });
+    beforeMenuItem.addActionListener(new ActionListener() {
+      
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        applyShifBefore();        
+      }
+    });
+    jPopupMenu.add(afterMenuItem);
+    jPopupMenu.add(beforeMenuItem);
     
     frmSubtitleshifter = new JFrame();
     frmSubtitleshifter.setTitle("SubtitleShifter");
@@ -243,7 +259,7 @@ public class ShifterApp implements MouseListener {
     panel_6.add(saveFileBtn);
     applyShiftBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        shiftApplyAction();
+        shiftApplyAction(0, true);
       }
     });
 
@@ -278,6 +294,16 @@ public class ShifterApp implements MouseListener {
     mnFile.add(exitMenuItem);
   }
 
+  protected void applyShifBefore() {
+    int index = subList.getSelectedIndex();
+    shiftApplyAction(index, false);
+  }
+
+  protected void applyShifAfter() {
+    int index = subList.getSelectedIndex();
+    shiftApplyAction(index, true);
+  }
+
   protected void search() {
     String searchStr = searchTF.getText();
     int index = app.search(searchStr);
@@ -304,12 +330,12 @@ public class ShifterApp implements MouseListener {
     }
   }
 
-  protected void shiftApplyAction() {
+  protected void shiftApplyAction(int index, boolean after) {
     String shiftStr = shiftTF.getText();
     int shift = 0;
     try {
       shift = Integer.parseInt(shiftStr);
-      app.applyShiftMillis(shift);
+      app.applyShiftMillis(shift, index, after);
       // textArea.setListData(app.getLinesAsArray());
       subList.repaint();
       saveFileBtn.setEnabled(true);
