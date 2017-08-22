@@ -6,7 +6,6 @@ import java.util.Date;
 public class SubtitleLine {
 
   int lineNum;
-  String timeFromTo;
   String text;
   Date timeFrom;
   Date timeTo;
@@ -16,11 +15,11 @@ public class SubtitleLine {
   public SubtitleLine() {
   }
 
-  public SubtitleLine(int lineNum, String timeFromTo, String text) {
+  public SubtitleLine(int lineNum, String timeFromTo, String text) throws Exception {
     super();
     this.lineNum = lineNum;
-    this.timeFromTo = timeFromTo;
     this.text = text;
+    setTimeFromTo(timeFromTo);
   }
 
   public int getLineNum() {
@@ -31,12 +30,7 @@ public class SubtitleLine {
     this.lineNum = lineNum;
   }
 
-  public String getTimeFromTo() {
-    return timeFromTo;
-  }
-
   public void setTimeFromTo(String timeFromTo) throws Exception {
-    this.timeFromTo = timeFromTo;
     String[] parts = timeFromTo.split(Constants.TIME_DELIMITTER_SRT);
     this.timeFrom = sdf.parse(parts[0].trim());
     this.timeTo = sdf.parse(parts[1].trim());
@@ -51,7 +45,7 @@ public class SubtitleLine {
   }
 
   public String getLineFormated(String format) {
-    return lineNum + "\n" + sdf.format(timeFrom) + " --> " + sdf.format(timeTo) + "\n" + text + "\n";
+    return lineNum + "\n" + getTimeFromTo() + "\n" + text + "\n";
   }
 
   public String toString() {
@@ -65,5 +59,13 @@ public class SubtitleLine {
     time = timeTo.getTime();
     time = time + shift;
     timeTo.setTime(time);
+  }
+
+  public String getTextAsHTML() {
+    return text.replaceAll("\n", "<br/>");
+  }
+
+  public String getTimeFromTo() {
+    return sdf.format(timeFrom) + " --> " + sdf.format(timeTo);
   }
 }

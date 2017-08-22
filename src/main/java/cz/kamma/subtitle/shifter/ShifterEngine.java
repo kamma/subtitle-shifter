@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ShifterEngine {
 
@@ -88,5 +89,13 @@ public class ShifterEngine {
 
   public boolean isFileOpen() {
     return lines != null && !lines.isEmpty();
+  }
+  
+  public SubtitleLine[] getLinesAsArray() {
+    return lines.toArray(new SubtitleLine[0]);
+  }
+
+  public List<SubtitleLine> getLines() {
+    return lines;
   }
 }

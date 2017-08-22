@@ -1,6 +1,7 @@
 package cz.kamma.subtitle.shifter.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -13,18 +14,20 @@ import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import cz.kamma.subtitle.shifter.Constants;
@@ -35,7 +38,7 @@ public class ShifterApp {
 
   private JFrame frmSubtitleshifter;
   private JPanel panel;
-  private JTextArea textArea;
+  private JList<SubtitleLine> textArea;
   private JPanel panel_1;
   private JTextField shiftTF;
   private JButton applyShiftBtn;
@@ -101,9 +104,9 @@ public class ShifterApp {
     frmSubtitleshifter.getContentPane().add(panel);
     panel.setLayout(new BorderLayout(0, 0));
 
-    textArea = new JTextArea();
+    textArea = new JList<>();
+    textArea.setCellRenderer(new MyListCellRenderer());
     scrollPane = new JScrollPane(textArea);
-    textArea.setEditable(false);
     panel.add(scrollPane, BorderLayout.CENTER);
 
     panel_2 = new JPanel();
@@ -221,8 +224,7 @@ public class ShifterApp {
       if (filename != null && !"".equals(filename))
         app.openFile(filename);
       app.readFile((String) encodingCB.getSelectedItem(), Constants.FORMAT_TYPE_SRT);
-      textArea.setText(app.getFileText(Constants.FORMAT_TYPE_SRT));
-      textArea.setCaretPosition(0);
+      textArea.setListData(app.getLinesAsArray());
       saveFileBtn.setEnabled(true);
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(frmSubtitleshifter, "Error occured while reading file.\nError: " + ex.getMessage(), "Cannot read file", JOptionPane.ERROR_MESSAGE);
@@ -235,8 +237,7 @@ public class ShifterApp {
     try {
       shift = Integer.parseInt(shiftStr);
       app.applyShiftMillis(shift);
-      textArea.setText(app.getFileText(Constants.FORMAT_TYPE_SRT));
-      textArea.setCaretPosition(0);
+      textArea.setListData(app.getLinesAsArray());
       saveFileBtn.setEnabled(true);
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(frmSubtitleshifter, "Error occured while applying shift.\nError: " + ex.getMessage(), "Cannot shift subtitles", JOptionPane.ERROR_MESSAGE);
@@ -266,6 +267,21 @@ public class ShifterApp {
         JOptionPane.showMessageDialog(frmSubtitleshifter, "Error occured while opening the file.\nError: " + ex.getMessage(), "Cannot open file", JOptionPane.ERROR_MESSAGE);
       }
       reloadFile();
+    }
+  }
+
+  private class MyListCellRenderer extends DefaultListCellRenderer {
+
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+      super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+      SubtitleLine sl = (SubtitleLine) value;
+      String labelText = "<html><body>" + sl.getLineNum() + "<br/>" + sl.getTimeFromTo() + "<br/>" + sl.getTextAsHTML()+"<br/></body></html>";
+      setText(labelText);
+
+      return this;
     }
   }
 
