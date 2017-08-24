@@ -212,6 +212,18 @@ public class ShifterApp implements MouseListener {
       }
     });
     panel_5.add(openFileBtn);
+    
+        panel_6 = new JPanel();
+        panel_2.add(panel_6);
+        
+            saveFileBtn = new JButton("Save Subtitles");
+            saveFileBtn.setEnabled(false);
+            saveFileBtn.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent arg0) {
+                saveFileAction();
+              }
+            });
+            panel_6.add(saveFileBtn);
 
     panel_1 = new JPanel();
     panel.add(panel_1, BorderLayout.SOUTH);
@@ -245,18 +257,6 @@ public class ShifterApp implements MouseListener {
       }
     });
     panel_8.add(searchBtn);
-
-    panel_6 = new JPanel();
-    panel_1.add(panel_6);
-
-    saveFileBtn = new JButton("Save Subtitles");
-    saveFileBtn.setEnabled(false);
-    saveFileBtn.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent arg0) {
-        saveFileAction();
-      }
-    });
-    panel_6.add(saveFileBtn);
     applyShiftBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         shiftApplyAction(0, true);
