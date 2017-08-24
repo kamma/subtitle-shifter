@@ -1,6 +1,7 @@
 package cz.kamma.subtitle.shifter.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -14,6 +15,7 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
@@ -30,7 +32,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpringLayout;
 
 import cz.kamma.subtitle.shifter.Constants;
 import cz.kamma.subtitle.shifter.ShifterEngine;
@@ -349,11 +353,34 @@ public class ShifterApp {
     if (index < 0)
       return;
     SubtitleLine sl = app.getLines().get(index);
-    String s = (String) JOptionPane.showInputDialog(frmSubtitleshifter, null, "Edit Subtitle Text", JOptionPane.PLAIN_MESSAGE, null, null, sl.getText());
+    String s = createTextAreaDialog("Edit Subtitle Text", sl.getText());
     if (s != null) {
       sl.setText(s);
     }
     subList.repaint();
+  }
+
+  private String createTextAreaDialog(String title, String initialString) {
+    final SpringLayout layout = new SpringLayout();
+    final JPanel panel = new JPanel(layout);
+    panel.setPreferredSize(new Dimension(250, 160));
+    JLabel subTextLbl = new JLabel("Text");
+    JTextArea subText = new JTextArea();
+    subText.setBorder(BorderFactory.createLineBorder(Color.black));
+    subText.setLineWrap(true);
+    subText.setWrapStyleWord(true);
+    if (initialString!=null)
+      subText.setText(initialString);
+    JScrollPane scrollPane = new JScrollPane(subText, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+    scrollPane.setPreferredSize(new Dimension(250, 100));
+    panel.add(scrollPane);
+    layout.putConstraint(SpringLayout.NORTH, scrollPane, 10, SpringLayout.SOUTH, subTextLbl);
+    int result = JOptionPane.showConfirmDialog(frmSubtitleshifter, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+    if (result == JOptionPane.YES_OPTION) {
+      return subText.getText();
+    }
+    return null;
   }
 
   protected void applyShifBefore() {
