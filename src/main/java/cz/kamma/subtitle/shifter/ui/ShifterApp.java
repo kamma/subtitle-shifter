@@ -1,7 +1,6 @@
 package cz.kamma.subtitle.shifter.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -15,7 +14,6 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
@@ -34,7 +32,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SpringLayout;
 
 import cz.kamma.subtitle.shifter.Constants;
 import cz.kamma.subtitle.shifter.ShifterEngine;
@@ -375,7 +372,7 @@ public class ShifterApp {
     int result = JOptionPane.showConfirmDialog(frmSubtitleshifter, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
     if (result == JOptionPane.YES_OPTION) {
-      return subText.getText();
+      return subText.getText().trim().concat("\n");
     }
     return null;
   }
