@@ -306,6 +306,8 @@ public class ShifterApp implements MouseListener {
 
   protected void search() {
     String searchStr = searchTF.getText();
+    if (searchStr==null || searchStr.trim().length()==0)
+      return;
     int index = app.search(searchStr);
     if (index < 0)
       JOptionPane.showMessageDialog(frmSubtitleshifter, "String not found", "Search result", JOptionPane.INFORMATION_MESSAGE);
@@ -332,6 +334,8 @@ public class ShifterApp implements MouseListener {
 
   protected void shiftApplyAction(int index, boolean after) {
     String shiftStr = shiftTF.getText();
+    if (shiftStr==null || shiftStr.trim().length()==0)
+      return;
     int shift = 0;
     try {
       shift = Integer.parseInt(shiftStr);
