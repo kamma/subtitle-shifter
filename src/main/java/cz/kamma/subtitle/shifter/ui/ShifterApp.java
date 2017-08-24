@@ -361,20 +361,17 @@ public class ShifterApp {
   }
 
   private String createTextAreaDialog(String title, String initialString) {
-    final SpringLayout layout = new SpringLayout();
+    final BorderLayout layout = new BorderLayout();
     final JPanel panel = new JPanel(layout);
-    panel.setPreferredSize(new Dimension(250, 160));
-    JLabel subTextLbl = new JLabel("Text");
+    panel.setPreferredSize(new Dimension(380, 160));
     JTextArea subText = new JTextArea();
-    subText.setBorder(BorderFactory.createLineBorder(Color.black));
     subText.setLineWrap(true);
     subText.setWrapStyleWord(true);
     if (initialString!=null)
       subText.setText(initialString);
-    JScrollPane scrollPane = new JScrollPane(subText, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-    scrollPane.setPreferredSize(new Dimension(250, 100));
+    JScrollPane scrollPane = new JScrollPane(subText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    scrollPane.setPreferredSize(new Dimension(380, 100));
     panel.add(scrollPane);
-    layout.putConstraint(SpringLayout.NORTH, scrollPane, 10, SpringLayout.SOUTH, subTextLbl);
     int result = JOptionPane.showConfirmDialog(frmSubtitleshifter, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
     if (result == JOptionPane.YES_OPTION) {
