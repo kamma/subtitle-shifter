@@ -36,7 +36,7 @@ import cz.kamma.subtitle.shifter.Constants;
 import cz.kamma.subtitle.shifter.ShifterEngine;
 import cz.kamma.subtitle.shifter.SubtitleLine;
 
-public class ShifterApp implements MouseListener {
+public class ShifterApp {
 
   private JFrame frmSubtitleshifter;
   private JPanel panel;
@@ -72,6 +72,7 @@ public class ShifterApp implements MouseListener {
   private JButton searchBtn;
   private JLabel lblNewLabel_2;
   private JPopupMenu jPopupMenu;
+  private JPanel panel_9;
 
   /**
    * Launch the application.
@@ -96,30 +97,10 @@ public class ShifterApp implements MouseListener {
     initialize();
   }
 
-  public void mousePressed(MouseEvent e) {
-    check(e);
-  }
-
-  public void mouseEntered(MouseEvent e) {
-    //check(e);
-  }
-  
-  public void mouseClicked(MouseEvent e) {
-    //check(e);
-  }
-
-  public void mouseExited(MouseEvent e) {
-    //check(e);
-  }
-  
-  public void mouseReleased(MouseEvent e) {
-    check(e);
-  }
-
   public void check(MouseEvent e) {
     if (e.isPopupTrigger()) { // if the event shows the menu
       subList.setSelectedIndex(subList.locationToIndex(e.getPoint())); // select the item
-      if (subList.getSelectedIndex()>=0)
+      if (subList.getSelectedIndex() >= 0)
         jPopupMenu.show(subList, e.getX(), e.getY()); // and show the menu
     }
   }
@@ -130,46 +111,100 @@ public class ShifterApp implements MouseListener {
   private void initialize() {
     app = new ShifterEngine();
     jPopupMenu = new JPopupMenu("Action");
-    JMenuItem afterMenuItem = new JMenuItem("Apply shift after");
-    JMenuItem beforeMenuItem = new JMenuItem("Apply shift before");
+    JMenuItem afterMenuItem = new JMenuItem("Apply Shift After");
+    JMenuItem beforeMenuItem = new JMenuItem("Apply Shift Before");
+    JMenuItem textMenuItem = new JMenuItem("Edit Subtitle Text");
+    JMenuItem timeStartMenuItem = new JMenuItem("Edit Subtitle Time - Start");
+    JMenuItem timeEndMenuItem = new JMenuItem("Edit Subtitle Time - End");
     afterMenuItem.addActionListener(new ActionListener() {
-      
+
       @Override
       public void actionPerformed(ActionEvent e) {
-        applyShifAfter();        
+        applyShifAfter();
       }
     });
     beforeMenuItem.addActionListener(new ActionListener() {
-      
+
       @Override
       public void actionPerformed(ActionEvent e) {
-        applyShifBefore();        
+        applyShifBefore();
+      }
+    });
+    textMenuItem.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        editSubtitleText();
+      }
+    });
+    timeStartMenuItem.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        editSubtitleTtime(true);
+      }
+    });
+    timeEndMenuItem.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        editSubtitleTtime(false);
       }
     });
     jPopupMenu.add(afterMenuItem);
     jPopupMenu.add(beforeMenuItem);
-    
+    jPopupMenu.add(textMenuItem);
+    jPopupMenu.add(timeStartMenuItem);
+    jPopupMenu.add(timeEndMenuItem);
+
     frmSubtitleshifter = new JFrame();
     frmSubtitleshifter.setTitle("SubtitleShifter");
     frmSubtitleshifter.setBounds(100, 100, 850, 512);
     frmSubtitleshifter.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frmSubtitleshifter.getContentPane().setLayout(new BoxLayout(frmSubtitleshifter.getContentPane(), BoxLayout.X_AXIS));
     frmSubtitleshifter.setMinimumSize(new Dimension(850, 512));
-    
+
     panel = new JPanel();
     frmSubtitleshifter.getContentPane().add(panel);
     panel.setLayout(new BorderLayout(0, 0));
 
-    subList = new JList<>();
-    subList.setCellRenderer(new MyListCellRenderer());
-    subList.addMouseListener(this);
-    scrollPane = new JScrollPane(subList);
-    panel.add(scrollPane, BorderLayout.CENTER);
+    panel_1 = new JPanel();
+    panel.add(panel_1, BorderLayout.SOUTH);
+    panel_1.setLayout(new BorderLayout(0, 0));
+
+    panel_7 = new JPanel();
+    panel_1.add(panel_7, BorderLayout.WEST);
+
+    lblNewLabel_2 = new JLabel("Shift (ms)");
+    panel_7.add(lblNewLabel_2);
+
+    shiftTF = new JTextField();
+
+    panel_7.add(shiftTF);
+    shiftTF.setColumns(10);
+
+    applyShiftBtn = new JButton("Apply Shift");
+    panel_7.add(applyShiftBtn);
+
+    panel_8 = new JPanel();
+    panel_1.add(panel_8, BorderLayout.EAST);
+
+    searchTF = new JTextField();
+    panel_8.add(searchTF);
+    searchTF.setColumns(10);
+
+    searchBtn = new JButton("Search / Next");
+    searchBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent arg0) {
+        search();
+      }
+    });
+    panel_8.add(searchBtn);
 
     panel_2 = new JPanel();
+    panel.add(panel_2, BorderLayout.NORTH);
     FlowLayout flowLayout_1 = (FlowLayout) panel_2.getLayout();
     flowLayout_1.setAlignment(FlowLayout.LEFT);
-    scrollPane.setColumnHeaderView(panel_2);
 
     panel_3 = new JPanel();
     panel_2.add(panel_3);
@@ -212,51 +247,61 @@ public class ShifterApp implements MouseListener {
       }
     });
     panel_5.add(openFileBtn);
-    
-        panel_6 = new JPanel();
-        panel_2.add(panel_6);
-        
-            saveFileBtn = new JButton("Save Subtitles");
-            saveFileBtn.setEnabled(false);
-            saveFileBtn.addActionListener(new ActionListener() {
-              public void actionPerformed(ActionEvent arg0) {
-                saveFileAction();
-              }
-            });
-            panel_6.add(saveFileBtn);
 
-    panel_1 = new JPanel();
-    panel.add(panel_1, BorderLayout.SOUTH);
-    panel_1.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+    panel_6 = new JPanel();
+    panel_2.add(panel_6);
 
-    panel_7 = new JPanel();
-    panel_1.add(panel_7);
-
-    lblNewLabel_2 = new JLabel("Shift (ms)");
-    panel_7.add(lblNewLabel_2);
-
-    shiftTF = new JTextField();
-
-    panel_7.add(shiftTF);
-    shiftTF.setColumns(10);
-
-    applyShiftBtn = new JButton("Apply Shift");
-    panel_7.add(applyShiftBtn);
-
-    panel_8 = new JPanel();
-    panel_1.add(panel_8);
-
-    searchTF = new JTextField();
-    panel_8.add(searchTF);
-    searchTF.setColumns(10);
-
-    searchBtn = new JButton("Search / Next");
-    searchBtn.addActionListener(new ActionListener() {
+    saveFileBtn = new JButton("Save Subtitles");
+    saveFileBtn.setEnabled(false);
+    saveFileBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent arg0) {
-        search();
+        saveFileAction();
       }
     });
-    panel_8.add(searchBtn);
+    panel_6.add(saveFileBtn);
+
+    panel_9 = new JPanel();
+    panel.add(panel_9, BorderLayout.CENTER);
+    panel_9.setLayout(new BorderLayout(0, 0));
+
+    subList = new JList<>();
+    subList.setCellRenderer(new MyListCellRenderer());
+    subList.addMouseListener(new MouseListener() {
+
+      @Override
+      public void mouseReleased(MouseEvent event) {
+        check(event);
+
+      }
+
+      @Override
+      public void mousePressed(MouseEvent event) {
+        check(event);
+
+      }
+
+      @Override
+      public void mouseExited(MouseEvent event) {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void mouseEntered(MouseEvent event) {
+        // TODO Auto-generated method stub
+
+      }
+
+      @Override
+      public void mouseClicked(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+          editSubtitleText();
+        }
+      }
+    });
+    scrollPane = new JScrollPane(subList);
+    panel_9.add(scrollPane);
+
     applyShiftBtn.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         shiftApplyAction(0, true);
@@ -294,6 +339,23 @@ public class ShifterApp implements MouseListener {
     mnFile.add(exitMenuItem);
   }
 
+  protected void editSubtitleTtime(boolean start) {
+    // TODO Auto-generated method stub
+
+  }
+
+  protected void editSubtitleText() {
+    int index = subList.getSelectedIndex();
+    if (index < 0)
+      return;
+    SubtitleLine sl = app.getLines().get(index);
+    String s = (String) JOptionPane.showInputDialog(frmSubtitleshifter, null, "Edit Subtitle Text", JOptionPane.PLAIN_MESSAGE, null, null, sl.getText());
+    if (s != null) {
+      sl.setText(s);
+    }
+    subList.repaint();
+  }
+
   protected void applyShifBefore() {
     int index = subList.getSelectedIndex();
     shiftApplyAction(index, false);
@@ -306,7 +368,7 @@ public class ShifterApp implements MouseListener {
 
   protected void search() {
     String searchStr = searchTF.getText();
-    if (searchStr==null || searchStr.trim().length()==0)
+    if (searchStr == null || searchStr.trim().length() == 0)
       return;
     int index = app.search(searchStr);
     if (index < 0)
@@ -334,7 +396,7 @@ public class ShifterApp implements MouseListener {
 
   protected void shiftApplyAction(int index, boolean after) {
     String shiftStr = shiftTF.getText();
-    if (shiftStr==null || shiftStr.trim().length()==0)
+    if (shiftStr == null || shiftStr.trim().length() == 0)
       return;
     int shift = 0;
     try {
