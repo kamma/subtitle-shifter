@@ -1,10 +1,12 @@
 package cz.kamma.subtitle.shifter.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -23,6 +25,7 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -37,6 +40,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.UIManager;
 
 import cz.kamma.subtitle.shifter.Constants;
 import cz.kamma.subtitle.shifter.ShifterEngine;
@@ -79,6 +84,7 @@ public class ShifterApp {
   private JPanel panel_9;
 
   private File openedFile;
+  private JCheckBox applyShiftInSelectionCB;
 
   /**
    * Launch the application.
@@ -116,6 +122,10 @@ public class ShifterApp {
    */
   private void initialize() {
     app = new ShifterEngine();
+    try {
+      UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+    } catch (Exception e) {
+    }
     jPopupMenu = new JPopupMenu("Action");
     JMenuItem afterMenuItem = new JMenuItem("Apply Shift After");
     JMenuItem beforeMenuItem = new JMenuItem("Apply Shift Before");
@@ -191,6 +201,9 @@ public class ShifterApp {
 
     applyShiftBtn = new JButton("Apply Shift");
     panel_7.add(applyShiftBtn);
+
+    applyShiftInSelectionCB = new JCheckBox("Only For Selected Lines");
+    panel_7.add(applyShiftInSelectionCB);
 
     panel_8 = new JPanel();
     panel_1.add(panel_8, BorderLayout.EAST);
@@ -278,6 +291,8 @@ public class ShifterApp {
 
     subList = new JList<>();
     subList.setCellRenderer(new MyListCellRenderer());
+    subList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    subList.setFont(new Font("Courier New", Font.BOLD, 12));
     subList.setDropTarget(new DropTarget() {
       public synchronized void drop(DropTargetDropEvent evt) {
         try {
@@ -388,6 +403,7 @@ public class ShifterApp {
     JTextArea subText = new JTextArea();
     subText.setLineWrap(true);
     subText.setWrapStyleWord(true);
+    subText.setFont(new Font("Courier New", Font.BOLD, 12));
     if (initialString != null)
       subText.setText(initialString);
     JScrollPane scrollPane = new JScrollPane(subText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -443,7 +459,10 @@ public class ShifterApp {
     int shift = 0;
     try {
       shift = Integer.parseInt(shiftStr);
-      app.applyShiftMillis(shift, index, after);
+      if (applyShiftInSelectionCB.isSelected())
+        app.applyShiftMillis(shift, subList.getSelectedIndices());
+      else
+        app.applyShiftMillis(shift, index, after);
       subList.repaint();
       saveFileBtn.setEnabled(true);
     } catch (Exception ex) {
@@ -483,9 +502,10 @@ public class ShifterApp {
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
       super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
       SubtitleLine sl = (SubtitleLine) value;
-      String labelText = "<html><body>" + sl.getLineNum() + "<br/>" + sl.getTimeFromTo() + "<br/>" + sl.getTextAsHTML() + "<br/></body></html>";
+      String labelText = "<html><body><font color='blue'>" + sl.getLineNum() + "</font><br/><font color='red'>" + sl.getTimeFromTo() + "</font><br/><font color='green'>" + sl.getTextAsHTML() + "</font><br/></body></html>";
       setText(labelText);
-
+      if (isSelected)
+        setBackground(Color.YELLOW);
       return this;
     }
   }

@@ -75,6 +75,13 @@ public class ShifterEngine {
       }
     }
   }
+  
+  public void applyShiftMillis(int shift, int[] selectedIndices) {
+    for (int i:selectedIndices) {
+      SubtitleLine sl = lines.get(i);
+      sl.applyShiftMillis(shift);
+    }
+  }
 
   public static void main(String[] args) throws Exception {
     String filename = args[0];
