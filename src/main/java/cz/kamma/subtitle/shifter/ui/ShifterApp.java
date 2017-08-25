@@ -5,6 +5,10 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -13,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
@@ -53,8 +58,6 @@ public class ShifterApp {
   private ShifterEngine app;
   private JScrollPane scrollPane;
 
-  final JFileChooser fc = new JFileChooser();
-
   ArrayList<SubtitleLine> lines;
   private JPanel panel_2;
   private JLabel lblNewLabel_1;
@@ -74,6 +77,8 @@ public class ShifterApp {
   private JLabel lblNewLabel_2;
   private JPopupMenu jPopupMenu;
   private JPanel panel_9;
+  
+  private File openedFile;
 
   /**
    * Launch the application.
@@ -267,6 +272,19 @@ public class ShifterApp {
 
     subList = new JList<>();
     subList.setCellRenderer(new MyListCellRenderer());
+    subList.setDropTarget(new DropTarget() {
+      public synchronized void drop(DropTargetDropEvent evt) {
+        try {
+          evt.acceptDrop(DnDConstants.ACTION_COPY);
+          List<File> droppedFiles = (List<File>) evt.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+          for (File file : droppedFiles) {
+            reloadFile(file.getAbsolutePath());
+          }
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(frmSubtitleshifter, "Error occured while Drag'n'Drop file.\nError: " + ex.getMessage(), "Cannot open file", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    });
     subList.addMouseListener(new MouseListener() {
 
       @Override
@@ -364,7 +382,7 @@ public class ShifterApp {
     JTextArea subText = new JTextArea();
     subText.setLineWrap(true);
     subText.setWrapStyleWord(true);
-    if (initialString!=null)
+    if (initialString != null)
       subText.setText(initialString);
     JScrollPane scrollPane = new JScrollPane(subText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     scrollPane.setPreferredSize(new Dimension(380, 100));
@@ -405,11 +423,13 @@ public class ShifterApp {
 
   protected void reloadFile(String filename) {
     try {
-      if (filename != null && !"".equals(filename))
+      if (filename != null && !"".equals(filename)) {
         app.openFile(filename);
-      app.readFile((String) encodingCB.getSelectedItem(), Constants.FORMAT_TYPE_SRT);
-      subList.setListData(app.getLinesAsArray());
-      saveFileBtn.setEnabled(true);
+        app.readFile((String) encodingCB.getSelectedItem(), Constants.FORMAT_TYPE_SRT);
+        subList.setListData(app.getLinesAsArray());
+        openedFile = new File(filename);
+        saveFileBtn.setEnabled(true);
+      }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(frmSubtitleshifter, "Error occured while reading file.\nError: " + ex.getMessage(), "Cannot read file", JOptionPane.ERROR_MESSAGE);
     }
@@ -432,6 +452,8 @@ public class ShifterApp {
   }
 
   protected void saveFileAction() {
+    JFileChooser fc = new JFileChooser();
+    fc.setCurrentDirectory(openedFile.getParentFile());
     int returnVal = fc.showSaveDialog(frmSubtitleshifter);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File file = fc.getSelectedFile();
@@ -445,6 +467,7 @@ public class ShifterApp {
   }
 
   protected void openFileAction() {
+    JFileChooser fc = new JFileChooser();
     int returnVal = fc.showOpenDialog(frmSubtitleshifter);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File file = fc.getSelectedFile();
