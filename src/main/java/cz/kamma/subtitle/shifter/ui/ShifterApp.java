@@ -288,6 +288,8 @@ public class ShifterApp {
     subList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     subList.setFont(new Font("Courier New", Font.BOLD, 12));
     subList.setDropTarget(new DropTarget() {
+      private static final long serialVersionUID = 1L;
+
       public synchronized void drop(DropTargetDropEvent evt) {
         try {
           evt.acceptDrop(DnDConstants.ACTION_COPY);
