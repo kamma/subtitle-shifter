@@ -72,4 +72,20 @@ public class SubtitleLine {
   public boolean contains(String searchStr) {
     return toString().contains(searchStr);
   }
+
+  public void setTimeFrom(String time) throws Exception {
+    timeFrom.setTime(sdf.parse(time).getTime());
+  }
+  
+  public void setTimeTo(String time) throws Exception {
+    timeTo.setTime(sdf.parse(time).getTime());
+  }
+
+  public String getTimeFromFormatted() {
+    return sdf.format(timeFrom);
+  }
+  
+  public String getTimeToFormatted() {
+    return sdf.format(timeTo);
+  }
 }

@@ -18,6 +18,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +30,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -130,8 +133,7 @@ public class ShifterApp {
     JMenuItem afterMenuItem = new JMenuItem("Apply Shift After");
     JMenuItem beforeMenuItem = new JMenuItem("Apply Shift Before");
     JMenuItem textMenuItem = new JMenuItem("Edit Subtitle Text");
-    JMenuItem timeStartMenuItem = new JMenuItem("Edit Subtitle Time - Start");
-    JMenuItem timeEndMenuItem = new JMenuItem("Edit Subtitle Time - End");
+    JMenuItem timeMenuItem = new JMenuItem("Edit Subtitle Time");
     afterMenuItem.addActionListener(new ActionListener() {
 
       @Override
@@ -153,25 +155,17 @@ public class ShifterApp {
         editSubtitleText();
       }
     });
-    timeStartMenuItem.addActionListener(new ActionListener() {
+    timeMenuItem.addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        editSubtitleTtime(true);
-      }
-    });
-    timeEndMenuItem.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        editSubtitleTtime(false);
+        editSubtitleTime();
       }
     });
     jPopupMenu.add(afterMenuItem);
     jPopupMenu.add(beforeMenuItem);
     jPopupMenu.add(textMenuItem);
-    jPopupMenu.add(timeStartMenuItem);
-    jPopupMenu.add(timeEndMenuItem);
+    jPopupMenu.add(timeMenuItem);
 
     frmSubtitleshifter = new JFrame();
     frmSubtitleshifter.setTitle("SubtitleShifter");
@@ -379,9 +373,13 @@ public class ShifterApp {
     mnFile.add(exitMenuItem);
   }
 
-  protected void editSubtitleTtime(boolean start) {
-    // TODO Auto-generated method stub
-
+  protected void editSubtitleTime() {
+    int index = subList.getSelectedIndex();
+    if (index < 0)
+      return;
+    SubtitleLine sl = app.getLines().get(index);
+    createTimeDialog("Edit Subtitle Time", sl);
+    subList.repaint();
   }
 
   protected void editSubtitleText() {
@@ -415,6 +413,30 @@ public class ShifterApp {
       return subText.getText().trim().concat("\n");
     }
     return null;
+  }
+
+  private void createTimeDialog(String title, SubtitleLine line) {
+    final FlowLayout layout = new FlowLayout();
+    final JPanel panel = new JPanel(layout);
+    panel.setPreferredSize(new Dimension(200, 35));
+    JTextField startTime = new JTextField();
+    startTime.setText(line.getTimeFromFormatted());
+    JTextField endTime = new JTextField();
+    endTime.setText(line.getTimeToFormatted());
+    JLabel label = new JLabel(Constants.TIME_DELIMITTER_SRT);
+    panel.add(startTime);
+    panel.add(label);
+    panel.add(endTime);
+    int result = JOptionPane.showConfirmDialog(frmSubtitleshifter, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+    if (result == JOptionPane.YES_OPTION) {
+      try {
+        line.setTimeFrom(startTime.getText());
+        line.setTimeTo(endTime.getText());
+      } catch (Exception e) {
+        JOptionPane.showMessageDialog(frmSubtitleshifter, "Cannot parse time.\nError: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+    }
   }
 
   protected void applyShifBefore() {
