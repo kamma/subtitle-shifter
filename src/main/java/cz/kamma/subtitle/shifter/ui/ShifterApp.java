@@ -77,7 +77,7 @@ public class ShifterApp {
   private JLabel lblNewLabel_2;
   private JPopupMenu jPopupMenu;
   private JPanel panel_9;
-  
+
   private File openedFile;
 
   /**
@@ -226,9 +226,7 @@ public class ShifterApp {
 
       @Override
       public void itemStateChanged(ItemEvent e) {
-        if (app.isFileOpen()) {
-          reloadFile();
-        }
+        reloadFile(openedFile.getAbsolutePath());
       }
     });
 
@@ -241,6 +239,14 @@ public class ShifterApp {
     targetEncCB = new JComboBox<String>();
     targetEncCB.setModel(new DefaultComboBoxModel<String>(Constants.ENCODING_TYPES));
     targetEncCB.setSelectedItem(Constants.DEFAULT_CHARSET);
+    targetEncCB.setEnabled(false);
+    targetEncCB.addItemListener(new ItemListener() {
+
+      @Override
+      public void itemStateChanged(ItemEvent e) {
+        saveFileBtn.setEnabled(true);
+      }
+    });
     panel_4.add(targetEncCB);
 
     panel_5 = new JPanel();
@@ -410,25 +416,20 @@ public class ShifterApp {
     if (searchStr == null || searchStr.trim().length() == 0)
       return;
     int index = app.search(searchStr);
-    if (index < 0)
+    if (index < 0) {
+      subList.clearSelection();
       JOptionPane.showMessageDialog(frmSubtitleshifter, "String not found", "Search result", JOptionPane.INFORMATION_MESSAGE);
-    else
+    } else
       subList.setSelectedIndex(index);
-
-  }
-
-  protected void reloadFile() {
-    reloadFile(null);
   }
 
   protected void reloadFile(String filename) {
     try {
       if (filename != null && !"".equals(filename)) {
-        app.openFile(filename);
-        app.readFile((String) encodingCB.getSelectedItem(), Constants.FORMAT_TYPE_SRT);
+        app.readFile(filename, (String) encodingCB.getSelectedItem(), Constants.FORMAT_TYPE_SRT);
         subList.setListData(app.getLinesAsArray());
         openedFile = new File(filename);
-        saveFileBtn.setEnabled(true);
+        targetEncCB.setEnabled(true);
       }
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(frmSubtitleshifter, "Error occured while reading file.\nError: " + ex.getMessage(), "Cannot read file", JOptionPane.ERROR_MESSAGE);
@@ -443,7 +444,6 @@ public class ShifterApp {
     try {
       shift = Integer.parseInt(shiftStr);
       app.applyShiftMillis(shift, index, after);
-      // textArea.setListData(app.getLinesAsArray());
       subList.repaint();
       saveFileBtn.setEnabled(true);
     } catch (Exception ex) {
@@ -471,12 +471,7 @@ public class ShifterApp {
     int returnVal = fc.showOpenDialog(frmSubtitleshifter);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File file = fc.getSelectedFile();
-      try {
-        app.openFile(file.getAbsolutePath());
-      } catch (Exception ex) {
-        JOptionPane.showMessageDialog(frmSubtitleshifter, "Error occured while opening the file.\nError: " + ex.getMessage(), "Cannot open file", JOptionPane.ERROR_MESSAGE);
-      }
-      reloadFile();
+      reloadFile(file.getAbsolutePath());
     }
   }
 

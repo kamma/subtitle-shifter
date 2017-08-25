@@ -13,20 +13,20 @@ import java.util.List;
 
 public class ShifterEngine {
 
-  byte[] file;
   ArrayList<SubtitleLine> lines;
   int searchIndex = 0;
 
-  public void openFile(String filename) throws Exception {
+  private byte[] openFile(String filename) throws Exception {
     FileInputStream fis = new FileInputStream(filename);
-    file = new byte[fis.available()];
+    byte[] file = new byte[fis.available()];
     fis.read(file);
     fis.close();
+    return file;
   }
 
-  public void readFile(String encoding, String format) throws Exception {
+  public void readFile(String filename, String encoding, String format) throws Exception {
     lines = new ArrayList<SubtitleLine>();
-    Reader reader = new InputStreamReader(new ByteArrayInputStream(file), encoding);
+    Reader reader = new InputStreamReader(new ByteArrayInputStream(openFile(filename)), encoding);
     BufferedReader br = new BufferedReader(reader);
 
     while (br.ready()) {
@@ -82,8 +82,7 @@ public class ShifterEngine {
     String format = args[2];
     int shift = Integer.parseInt(args[3]);
     ShifterEngine a = new ShifterEngine();
-    a.openFile(filename);
-    a.readFile(encoding, format);
+    a.readFile(filename, encoding, format);
     a.applyShiftMillis(shift, 0, true);
     a.writeFile(filename + ".new", encoding, format);
   }
