@@ -4,6 +4,8 @@ at this moment only SRT format is supported
 
 tool is written in Java/Swing
 
+![alt text](/ss-ss.png)
+
 create eclipse project
 ======================
 mvn eclipse:eclipse
