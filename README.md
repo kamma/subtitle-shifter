@@ -4,6 +4,8 @@ at this moment only SRT format is supported
 
 tool is written in Java/Swing
 
+binary distribution is located in /target directory
+
 ![alt text](/ss-ss.png)
 
 create eclipse project
