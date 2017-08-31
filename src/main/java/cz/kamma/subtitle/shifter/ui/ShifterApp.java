@@ -112,6 +112,7 @@ public class ShifterApp {
   public void check(MouseEvent e) {
     jPopupMenu = new JPopupMenu("Action");
     if (e.isPopupTrigger()) { // if the event shows the menu
+      subList.setSelectedIndex(subList.locationToIndex(e.getPoint())); // select the item
       if (subList.getSelectedIndex() >= 0) {
         JMenuItem afterMenuItem = new JMenuItem("Apply Shift After");
         JMenuItem beforeMenuItem = new JMenuItem("Apply Shift Before");
