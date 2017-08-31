@@ -110,9 +110,57 @@ public class ShifterApp {
   }
 
   public void check(MouseEvent e) {
+    jPopupMenu = new JPopupMenu("Action");
     if (e.isPopupTrigger()) { // if the event shows the menu
-      subList.setSelectedIndex(subList.locationToIndex(e.getPoint())); // select the item
-      if (subList.getSelectedIndex() >= 0)
+      if (subList.getSelectedIndex() >= 0) {
+        JMenuItem afterMenuItem = new JMenuItem("Apply Shift After");
+        JMenuItem beforeMenuItem = new JMenuItem("Apply Shift Before");
+        JMenuItem editMenuItem = new JMenuItem("Edit Subtitle");
+        JMenuItem insMenuItem = new JMenuItem("Insert Subtitle Line");
+        JMenuItem delMenuItem = new JMenuItem("Delete Subtitle Line");
+        jPopupMenu.add(afterMenuItem);
+        jPopupMenu.add(beforeMenuItem);
+        jPopupMenu.add(editMenuItem);
+        jPopupMenu.add(insMenuItem);
+        jPopupMenu.add(delMenuItem);
+
+        afterMenuItem.addActionListener(new ActionListener() {
+
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            applyShifAfter();
+          }
+        });
+        beforeMenuItem.addActionListener(new ActionListener() {
+
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            applyShifBefore();
+          }
+        });
+        editMenuItem.addActionListener(new ActionListener() {
+
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            editSubtitle();
+          }
+        });
+        insMenuItem.addActionListener(new ActionListener() {
+
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            insertSubtitleLine();
+          }
+        });
+        delMenuItem.addActionListener(new ActionListener() {
+
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            deleteSubtitleLine();
+          }
+        });
+      }
+      if (jPopupMenu.getComponentCount() > 0)
         jPopupMenu.show(subList, e.getX(), e.getY()); // and show the menu
     }
   }
@@ -126,53 +174,6 @@ public class ShifterApp {
       UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
     } catch (Exception e) {
     }
-    jPopupMenu = new JPopupMenu("Action");
-    JMenuItem afterMenuItem = new JMenuItem("Apply Shift After");
-    JMenuItem beforeMenuItem = new JMenuItem("Apply Shift Before");
-    JMenuItem editMenuItem = new JMenuItem("Edit Subtitle");
-    JMenuItem insMenuItem = new JMenuItem("Insert Subtitle Line");
-    JMenuItem delMenuItem = new JMenuItem("Delete Subtitle Line");
-    jPopupMenu.add(afterMenuItem);
-    jPopupMenu.add(beforeMenuItem);
-    jPopupMenu.add(editMenuItem);
-    jPopupMenu.add(insMenuItem);
-    jPopupMenu.add(delMenuItem);
-
-    afterMenuItem.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        applyShifAfter();
-      }
-    });
-    beforeMenuItem.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        applyShifBefore();
-      }
-    });
-    editMenuItem.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        editSubtitle();
-      }
-    });
-    insMenuItem.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        insertSubtitleLine();
-      }
-    });
-    delMenuItem.addActionListener(new ActionListener() {
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        deleteSubtitleLine();
-      }
-    });
 
     frmSubtitleshifter = new JFrame();
     frmSubtitleshifter.setTitle("SubtitleShifter");
@@ -314,25 +315,18 @@ public class ShifterApp {
       @Override
       public void mouseReleased(MouseEvent event) {
         check(event);
-
       }
 
       @Override
       public void mousePressed(MouseEvent event) {
-        check(event);
-
       }
 
       @Override
       public void mouseExited(MouseEvent event) {
-        // TODO Auto-generated method stub
-
       }
 
       @Override
       public void mouseEntered(MouseEvent event) {
-        // TODO Auto-generated method stub
-
       }
 
       @Override
