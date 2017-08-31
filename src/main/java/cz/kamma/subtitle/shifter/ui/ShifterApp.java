@@ -18,8 +18,6 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +28,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -132,8 +129,15 @@ public class ShifterApp {
     jPopupMenu = new JPopupMenu("Action");
     JMenuItem afterMenuItem = new JMenuItem("Apply Shift After");
     JMenuItem beforeMenuItem = new JMenuItem("Apply Shift Before");
-    JMenuItem textMenuItem = new JMenuItem("Edit Subtitle Text");
-    JMenuItem timeMenuItem = new JMenuItem("Edit Subtitle Time");
+    JMenuItem editMenuItem = new JMenuItem("Edit Subtitle");
+    JMenuItem insMenuItem = new JMenuItem("Insert Subtitle Line");
+    JMenuItem delMenuItem = new JMenuItem("Delete Subtitle Line");
+    jPopupMenu.add(afterMenuItem);
+    jPopupMenu.add(beforeMenuItem);
+    jPopupMenu.add(editMenuItem);
+    jPopupMenu.add(insMenuItem);
+    jPopupMenu.add(delMenuItem);
+
     afterMenuItem.addActionListener(new ActionListener() {
 
       @Override
@@ -148,24 +152,27 @@ public class ShifterApp {
         applyShifBefore();
       }
     });
-    textMenuItem.addActionListener(new ActionListener() {
+    editMenuItem.addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        editSubtitleText();
+        editSubtitle();
       }
     });
-    timeMenuItem.addActionListener(new ActionListener() {
+    insMenuItem.addActionListener(new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        editSubtitleTime();
+        insertSubtitleLine();
       }
     });
-    jPopupMenu.add(afterMenuItem);
-    jPopupMenu.add(beforeMenuItem);
-    jPopupMenu.add(textMenuItem);
-    jPopupMenu.add(timeMenuItem);
+    delMenuItem.addActionListener(new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        deleteSubtitleLine();
+      }
+    });
 
     frmSubtitleshifter = new JFrame();
     frmSubtitleshifter.setTitle("SubtitleShifter");
@@ -331,7 +338,7 @@ public class ShifterApp {
       @Override
       public void mouseClicked(MouseEvent event) {
         if (event.getClickCount() == 2) {
-          editSubtitleText();
+          editSubtitle();
         }
       }
     });
@@ -375,70 +382,84 @@ public class ShifterApp {
     mnFile.add(exitMenuItem);
   }
 
-  protected void editSubtitleTime() {
+  protected void deleteSubtitleLine() {
     int index = subList.getSelectedIndex();
     if (index < 0)
       return;
-    SubtitleLine sl = app.getLines().get(index);
-    createTimeDialog("Edit Subtitle Time", sl);
-    subList.repaint();
-  }
-
-  protected void editSubtitleText() {
-    int index = subList.getSelectedIndex();
-    if (index < 0)
-      return;
-    SubtitleLine sl = app.getLines().get(index);
-    String s = createTextAreaDialog("Edit Subtitle Text", sl.getText());
-    if (s != null) {
-      sl.setText(s);
+    if (JOptionPane.showConfirmDialog(null, "Are you sure?", "Delete Subtitle", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+      app.deleteSubtitle(index);
+      subList.setListData(app.getLinesAsArray());
+      subList.repaint();
     }
+  }
+
+  protected void insertSubtitleLine() {
+    int index = subList.getSelectedIndex();
+    if (index < 0)
+      return;
+    SubtitleLine orig = app.getLines().get(index);
+    SubtitleLine sl = createSubtitleDialog("Insert Subtitle Line", orig);
+    if (sl != null)
+      app.insertSubtitleLine(index, sl);
+    subList.setListData(app.getLinesAsArray());
     subList.repaint();
   }
 
-  private String createTextAreaDialog(String title, String initialString) {
-    final BorderLayout layout = new BorderLayout();
+  protected void editSubtitle() {
+    int index = subList.getSelectedIndex();
+    if (index < 0)
+      return;
+    SubtitleLine orig = app.getLines().get(index);
+    SubtitleLine sl = createSubtitleDialog("Edit Subtitle", orig);
+    if (sl != null) {
+      orig.setText(sl.getText());
+      try {
+        orig.setTimeFrom(sl.getTimeFromFormatted());
+        orig.setTimeFromTo(sl.getTimeToFormatted());
+      } catch (Exception e) {
+
+      }
+    }
+    subList.setListData(app.getLinesAsArray());
+    subList.repaint();
+  }
+
+  private SubtitleLine createSubtitleDialog(String title, SubtitleLine sl) {
+    final FlowLayout layout = new FlowLayout();
     final JPanel panel = new JPanel(layout);
     panel.setPreferredSize(new Dimension(380, 160));
+    JTextField startTime = new JTextField();
+    startTime.setText(sl.getTimeFromFormatted());
+    JTextField endTime = new JTextField();
+    endTime.setText(sl.getTimeToFormatted());
+    JLabel label = new JLabel(Constants.TIME_DELIMITTER_SRT);
+    panel.add(startTime);
+    panel.add(label);
+    panel.add(endTime);
     JTextArea subText = new JTextArea();
     subText.setLineWrap(true);
     subText.setWrapStyleWord(true);
     subText.setFont(new Font("Courier New", Font.BOLD, 12));
-    if (initialString != null)
-      subText.setText(initialString);
+    if (sl.getText() != null)
+      subText.setText(sl.getText());
     JScrollPane scrollPane = new JScrollPane(subText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     scrollPane.setPreferredSize(new Dimension(380, 100));
     panel.add(scrollPane);
     int result = JOptionPane.showConfirmDialog(frmSubtitleshifter, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
     if (result == JOptionPane.YES_OPTION) {
-      return subText.getText().trim().concat("\n");
-    }
-    return null;
-  }
-
-  private void createTimeDialog(String title, SubtitleLine line) {
-    final FlowLayout layout = new FlowLayout();
-    final JPanel panel = new JPanel(layout);
-    panel.setPreferredSize(new Dimension(200, 35));
-    JTextField startTime = new JTextField();
-    startTime.setText(line.getTimeFromFormatted());
-    JTextField endTime = new JTextField();
-    endTime.setText(line.getTimeToFormatted());
-    JLabel label = new JLabel(Constants.TIME_DELIMITTER_SRT);
-    panel.add(startTime);
-    panel.add(label);
-    panel.add(endTime);
-    int result = JOptionPane.showConfirmDialog(frmSubtitleshifter, panel, title, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-
-    if (result == JOptionPane.YES_OPTION) {
+      SubtitleLine res = new SubtitleLine();
       try {
-        line.setTimeFrom(startTime.getText());
-        line.setTimeTo(endTime.getText());
+        res.setTimeFrom(startTime.getText());
+        res.setTimeTo(endTime.getText());
       } catch (Exception e) {
         JOptionPane.showMessageDialog(frmSubtitleshifter, "Cannot parse time.\nError: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        return null;
       }
+      res.setText(subText.getText().trim().concat("\n"));
+      return res;
     }
+    return null;
   }
 
   protected void applyShifBefore() {

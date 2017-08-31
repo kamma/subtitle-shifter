@@ -126,4 +126,20 @@ public class ShifterEngine {
     searchIndex = 0;
     return -1;
   }
+
+  public void insertSubtitleLine(int index, SubtitleLine sl) {
+    int orig = lines.get(index).getLineNum();
+    sl.setLineNum(orig);
+    for (int i=index;i<lines.size();i++) {
+      lines.get(i).incLineNum();
+    }
+    lines.add(index, sl); 
+  }
+
+  public void deleteSubtitle(int index) {
+    for (int i=index;i<lines.size();i++) {
+      lines.get(i).decLineNum();
+    }
+    lines.remove(index);     
+  }
 }

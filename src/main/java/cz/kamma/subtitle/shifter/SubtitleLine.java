@@ -16,7 +16,6 @@ public class SubtitleLine {
   }
 
   public SubtitleLine(int lineNum, String timeFromTo, String text) throws Exception {
-    super();
     this.lineNum = lineNum;
     this.text = text;
     setTimeFromTo(timeFromTo);
@@ -74,11 +73,11 @@ public class SubtitleLine {
   }
 
   public void setTimeFrom(String time) throws Exception {
-    timeFrom.setTime(sdf.parse(time).getTime());
+    timeFrom = sdf.parse(time);
   }
   
   public void setTimeTo(String time) throws Exception {
-    timeTo.setTime(sdf.parse(time).getTime());
+    timeTo = sdf.parse(time);
   }
 
   public String getTimeFromFormatted() {
@@ -87,5 +86,13 @@ public class SubtitleLine {
   
   public String getTimeToFormatted() {
     return sdf.format(timeTo);
+  }
+
+  public void incLineNum() {
+    lineNum++;    
+  }
+  
+  public void decLineNum() {
+    lineNum--;    
   }
 }
