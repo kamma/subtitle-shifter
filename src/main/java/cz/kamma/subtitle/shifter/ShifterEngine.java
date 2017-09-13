@@ -142,22 +142,14 @@ public class ShifterEngine {
     String res = translateTextWithGoogleAPIs(line, srcLang, destLang);
   }
 
-  public String translateTextWithGoogleAPIs(String line, String srcLang, String destLang) throws Exception {
-    URL url = new URL("https://translation.googleapis.com/language/translate/v2?key=AIzaSyDzLYIZ3tUG-FGJRBu5IhTrUqoTfzZX-eg");
+  public String translateTextWithGoogleAPIs(String line, String srcLang, String trgLang) throws Exception {
+    URL url = new URL("https://translate.googleapis.com/translate_a/single?client=gtx&sl="+srcLang+"&tl="+trgLang+"&dt=t&q="+line);
     HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-    con.setDoInput(true);
+    con.setDoInput(false);
     con.setDoOutput(true);
-    con.setRequestMethod("POST");
-    String template = "{'q': 'The quick brown fox jumped over the lazy dog.', 'source': 'en', 'target': 'es', 'format': 'text'}";
-
-    OutputStream os = con.getOutputStream();
-    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
-    writer.write(template);
-    writer.flush();
-    writer.close();
-    os.close();
+    con.setRequestMethod("GET");
     
-    con.connect();
+    int rc = con.getResponseCode();
     
     String response = "";
     
@@ -166,7 +158,7 @@ public class ShifterEngine {
         response+=line;
     }
     
-    return null;
+    return response;
   }
   
   public static void main(String[] args) throws Exception {
