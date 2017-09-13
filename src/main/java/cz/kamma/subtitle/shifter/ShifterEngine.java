@@ -1,15 +1,20 @@
 package cz.kamma.subtitle.shifter;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class ShifterEngine {
 
@@ -64,34 +69,23 @@ public class ShifterEngine {
 
   public void applyShiftMillis(int shift, int index, boolean after) {
     if (after) {
-      for (int i=index;i<lines.size();i++) {
+      for (int i = index; i < lines.size(); i++) {
         SubtitleLine sl = lines.get(i);
         sl.applyShiftMillis(shift);
       }
     } else {
-      for (int i=index;i>=0;i--) {
+      for (int i = index; i >= 0; i--) {
         SubtitleLine sl = lines.get(i);
         sl.applyShiftMillis(shift);
       }
     }
   }
-  
+
   public void applyShiftMillis(int shift, int[] selectedIndices) {
-    for (int i:selectedIndices) {
+    for (int i : selectedIndices) {
       SubtitleLine sl = lines.get(i);
       sl.applyShiftMillis(shift);
     }
-  }
-
-  public static void main(String[] args) throws Exception {
-    String filename = args[0];
-    String encoding = args[1];
-    String format = args[2];
-    int shift = Integer.parseInt(args[3]);
-    ShifterEngine a = new ShifterEngine();
-    a.readFile(filename, encoding, format);
-    a.applyShiftMillis(shift, 0, true);
-    a.writeFile(filename + ".new", encoding, format);
   }
 
   public String getFileText(String format) {
@@ -105,7 +99,7 @@ public class ShifterEngine {
   public boolean isFileOpen() {
     return lines != null && !lines.isEmpty();
   }
-  
+
   public SubtitleLine[] getLinesAsArray() {
     return lines.toArray(new SubtitleLine[0]);
   }
@@ -116,13 +110,13 @@ public class ShifterEngine {
 
   public int search(String searchStr) {
 
-    for (int i=searchIndex;i<lines.size();i++) {
+    for (int i = searchIndex; i < lines.size(); i++) {
       searchIndex++;
       SubtitleLine sl = lines.get(i);
       if (sl.contains(searchStr))
         return i;
     }
-    
+
     searchIndex = 0;
     return -1;
   }
@@ -130,16 +124,63 @@ public class ShifterEngine {
   public void insertSubtitleLine(int index, SubtitleLine sl) {
     int orig = lines.get(index).getLineNum();
     sl.setLineNum(orig);
-    for (int i=index;i<lines.size();i++) {
+    for (int i = index; i < lines.size(); i++) {
       lines.get(i).incLineNum();
     }
-    lines.add(index, sl); 
+    lines.add(index, sl);
   }
 
   public void deleteSubtitle(int index) {
-    for (int i=index;i<lines.size();i++) {
+    for (int i = index; i < lines.size(); i++) {
       lines.get(i).decLineNum();
     }
-    lines.remove(index);     
+    lines.remove(index);
+  }
+
+  public void translateLine(int lineNum, String srcLang, String destLang) throws Exception {
+    String line = lines.get(lineNum).getText();
+    String res = translateTextWithGoogleAPIs(line, srcLang, destLang);
+  }
+
+  public String translateTextWithGoogleAPIs(String line, String srcLang, String destLang) throws Exception {
+    URL url = new URL("https://translation.googleapis.com/language/translate/v2?key=AIzaSyDzLYIZ3tUG-FGJRBu5IhTrUqoTfzZX-eg");
+    HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+    con.setDoInput(true);
+    con.setDoOutput(true);
+    con.setRequestMethod("POST");
+    String template = "{'q': 'The quick brown fox jumped over the lazy dog.', 'source': 'en', 'target': 'es', 'format': 'text'}";
+
+    OutputStream os = con.getOutputStream();
+    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+    writer.write(template);
+    writer.flush();
+    writer.close();
+    os.close();
+    
+    con.connect();
+    
+    String response = "";
+    
+    BufferedReader br=new BufferedReader(new InputStreamReader(con.getInputStream()));
+    while ((line=br.readLine()) != null) {
+        response+=line;
+    }
+    
+    return null;
+  }
+  
+  public static void main(String[] args) throws Exception {
+    ShifterEngine e = new ShifterEngine();
+    e.translateTextWithGoogleAPIs("aa", "aa", "aa");
+    /*
+    String filename = args[0];
+    String encoding = args[1];
+    String format = args[2];
+    int shift = Integer.parseInt(args[3]);
+    ShifterEngine a = new ShifterEngine();
+    a.readFile(filename, encoding, format);
+    a.applyShiftMillis(shift, 0, true);
+    a.writeFile(filename + ".new", encoding, format);
+    */
   }
 }

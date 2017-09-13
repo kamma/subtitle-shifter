@@ -5,10 +5,10 @@ import java.util.Date;
 
 public class SubtitleLine {
 
-  int lineNum;
-  String text;
-  Date timeFrom;
-  Date timeTo;
+  private int lineNum;
+  private String text;
+  private Date timeFrom;
+  private Date timeTo;
 
   SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss,SSS");
 
