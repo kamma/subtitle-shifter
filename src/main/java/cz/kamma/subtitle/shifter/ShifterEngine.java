@@ -1,20 +1,21 @@
 package cz.kamma.subtitle.shifter;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
 
 public class ShifterEngine {
 
@@ -143,36 +144,31 @@ public class ShifterEngine {
   }
 
   public String translateTextWithGoogleAPIs(String line, String srcLang, String trgLang) throws Exception {
-    URL url = new URL("http://translate.googleapis.com/translate_a/single?client=gtx&sl="+srcLang+"&tl="+trgLang+"&dt=t&q="+line);
-    HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-    con.setDoInput(false);
-    con.setDoOutput(true);
+    URL url = new URL("http://translate.googleapis.com/translate_a/single?client=gtx&sl=" + srcLang + "&tl=" + trgLang + "&dt=t&q=" + line);
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
     con.setRequestMethod("GET");
-    
+
     int rc = con.getResponseCode();
-    
+
     String response = "";
-    
-    BufferedReader br=new BufferedReader(new InputStreamReader(con.getInputStream()));
-    while ((line=br.readLine()) != null) {
-        response+=line;
+
+    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    while ((line = br.readLine()) != null) {
+      response += line;
     }
-    
+
     return response;
   }
-  
+
   public static void main(String[] args) throws Exception {
     ShifterEngine e = new ShifterEngine();
-    e.translateTextWithGoogleAPIs("aa", "aa", "aa");
+    e.translateTextWithGoogleAPIs("just+test", "en", "cz");
     /*
-    String filename = args[0];
-    String encoding = args[1];
-    String format = args[2];
-    int shift = Integer.parseInt(args[3]);
-    ShifterEngine a = new ShifterEngine();
-    a.readFile(filename, encoding, format);
-    a.applyShiftMillis(shift, 0, true);
-    a.writeFile(filename + ".new", encoding, format);
-    */
+     * String filename = args[0]; String encoding = args[1]; String format =
+     * args[2]; int shift = Integer.parseInt(args[3]); ShifterEngine a = new
+     * ShifterEngine(); a.readFile(filename, encoding, format);
+     * a.applyShiftMillis(shift, 0, true); a.writeFile(filename + ".new", encoding,
+     * format);
+     */
   }
 }
