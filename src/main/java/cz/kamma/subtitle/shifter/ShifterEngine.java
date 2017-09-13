@@ -143,7 +143,7 @@ public class ShifterEngine {
   }
 
   public String translateTextWithGoogleAPIs(String line, String srcLang, String trgLang) throws Exception {
-    URL url = new URL("https://translate.googleapis.com/translate_a/single?client=gtx&sl="+srcLang+"&tl="+trgLang+"&dt=t&q="+line);
+    URL url = new URL("http://translate.googleapis.com/translate_a/single?client=gtx&sl="+srcLang+"&tl="+trgLang+"&dt=t&q="+line);
     HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
     con.setDoInput(false);
     con.setDoOutput(true);
