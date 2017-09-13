@@ -61,7 +61,7 @@ public class SubtitleLine {
   }
 
   public String getTextAsHTML() {
-    return text.replaceAll("\n", "<br/>");
+    return text.replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\n", "<br/>");
   }
 
   public String getTimeFromTo() {
