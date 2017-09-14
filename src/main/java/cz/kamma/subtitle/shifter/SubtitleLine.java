@@ -18,7 +18,25 @@ public class SubtitleLine {
   public SubtitleLine(int lineNum, String timeFromTo, String text) throws Exception {
     this.lineNum = lineNum;
     this.text = text;
+    
     setTimeFromTo(timeFromTo);
+  }
+  
+  public SubtitleLine clone() {
+    SubtitleLine sl = new SubtitleLine();
+    sl.setLineNum(lineNum);
+    sl.setText(text);
+    sl.setTimeFrom(timeFrom);
+    sl.setTimeTo(timeTo);
+    return sl;
+  }
+
+  private void setTimeTo(Date timeTo2) {
+    timeTo = new Date(timeTo2.getTime());
+  }
+
+  private void setTimeFrom(Date timeFrom2) {
+    timeFrom = new Date(timeFrom2.getTime());
   }
 
   public int getLineNum() {
@@ -95,4 +113,5 @@ public class SubtitleLine {
   public void decLineNum() {
     lineNum--;    
   }
+  
 }

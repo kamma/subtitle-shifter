@@ -47,12 +47,13 @@ import cz.kamma.subtitle.shifter.Constants;
 import cz.kamma.subtitle.shifter.ShifterEngine;
 import cz.kamma.subtitle.shifter.SubtitleLine;
 import javax.swing.JSplitPane;
+import javax.swing.SwingConstants;
 
 public class ShifterApp {
 
 	private JFrame frmSubtitleshifter;
 	private JPanel panel;
-	private JList<SubtitleLine> subList, transList;
+	private JList<SubtitleLine> subList, origList;
 	private JPanel panel_1;
 	private JTextField shiftTF;
 	private JButton applyShiftBtn;
@@ -86,6 +87,9 @@ public class ShifterApp {
 	private JCheckBox applyShiftInSelectionCB;
 	private JButton translationModeBtn;
 	private JSplitPane splitPane;
+	private JPanel panel_6;
+	private JLabel lblNewLabel_3;
+	private JLabel lblNewLabel_4;
 
 	/**
 	 * Launch the application.
@@ -282,15 +286,19 @@ public class ShifterApp {
 		saveFileBtn = new JButton("Save Subtitles");
 		panel_5.add(saveFileBtn);
 		saveFileBtn.setEnabled(false);
-
-		translationModeBtn = new JButton("Translation Mode");
-		translationModeBtn.setEnabled(false);
-		translationModeBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				toggleTranslationMode();
-			}
-		});
-		panel_5.add(translationModeBtn);
+		
+		panel_6 = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panel_6.getLayout();
+		panel_2.add(panel_6);
+		
+				translationModeBtn = new JButton("Translate");
+				panel_6.add(translationModeBtn);
+				translationModeBtn.setEnabled(false);
+				translationModeBtn.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						toggleTranslationMode();
+					}
+				});
 		saveFileBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				saveFileAction();
@@ -350,15 +358,43 @@ public class ShifterApp {
 			}
 		});
 		
-		transList = new JList<>();
-		transList.setCellRenderer(new MyListCellRenderer());
-		transList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		transList.setFont(new Font("Courier New", Font.BOLD, 12));
+		origList = new JList<>();
+		origList.setCellRenderer(new MyListCellRenderer());
+		origList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		origList.setFont(new Font("Courier New", Font.BOLD, 12));
+		origList.setDropTarget(new DropTarget() {
+      private static final long serialVersionUID = 1L;
 
-		scrollPane = new JScrollPane(subList);
-		scrollPane2 = new JScrollPane(transList);
+      public synchronized void drop(DropTargetDropEvent evt) {
+        try {
+          evt.acceptDrop(DnDConstants.ACTION_COPY);
+          List<File> droppedFiles = (List<File>) evt.getTransferable()
+              .getTransferData(DataFlavor.javaFileListFlavor);
+          for (File file : droppedFiles) {
+            reloadFile(file.getAbsolutePath());
+          }
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(frmSubtitleshifter,
+              "Error occured while Drag'n'Drop file.\nError: " + ex.getMessage(), "Cannot open file",
+              JOptionPane.ERROR_MESSAGE);
+        }
+      }
+    });
+
+		scrollPane = new JScrollPane(origList);
+		scrollPane2 = new JScrollPane(subList);
 		splitPane.setLeftComponent(scrollPane);
+		
+		lblNewLabel_3 = new JLabel("Original Subtitles");
+		lblNewLabel_3.setHorizontalAlignment(SwingConstants.CENTER);
+		scrollPane.setColumnHeaderView(lblNewLabel_3);
 		splitPane.setRightComponent(scrollPane2);
+		
+		lblNewLabel_4 = new JLabel("Modified Subtitles");
+		lblNewLabel_4.setHorizontalAlignment(SwingConstants.CENTER);
+		scrollPane2.setColumnHeaderView(lblNewLabel_4);
+		scrollPane.getHorizontalScrollBar().setModel(scrollPane2.getHorizontalScrollBar().getModel());
+		scrollPane.getVerticalScrollBar().setModel(scrollPane2.getVerticalScrollBar().getModel());
 
 		applyShiftBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -399,8 +435,8 @@ public class ShifterApp {
 
 	protected void toggleTranslationMode() {
 		try {
-			app.translateAll();
-			transList.setListData(app.getTransLinesAsArray());
+			//app.translateAll();
+			subList.setListData(app.getLinesAsArray());
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(frmSubtitleshifter, "Cannot translate subtitles.\nError: " + e.getMessage(),
 					"Translation error", JOptionPane.ERROR_MESSAGE);
@@ -518,6 +554,7 @@ public class ShifterApp {
 		try {
 			if (filename != null && !"".equals(filename)) {
 				app.readFile(filename, (String) encodingCB.getSelectedItem(), Constants.FORMAT_TYPE_SRT);
+				origList.setListData(app.getOrigLinesAsArray());
 				subList.setListData(app.getLinesAsArray());
 				openedFile = new File(filename);
 				targetEncCB.setEnabled(true);
