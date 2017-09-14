@@ -490,9 +490,9 @@ public class ShifterApp {
 		final FlowLayout layout = new FlowLayout();
 		final JPanel panel = new JPanel(layout);
 		panel.setPreferredSize(new Dimension(380, 160));
-		JTextField startTime = new JTextField();
+		JTextField startTime = new JTextField(10);
 		startTime.setText(sl.getTimeFromFormatted());
-		JTextField endTime = new JTextField();
+		JTextField endTime = new JTextField(10);
 		endTime.setText(sl.getTimeToFormatted());
 		JLabel label = new JLabel(Constants.TIME_DELIMITTER_SRT);
 		panel.add(startTime);
