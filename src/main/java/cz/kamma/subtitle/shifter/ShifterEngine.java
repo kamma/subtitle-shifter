@@ -13,167 +13,227 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.kamma.subtitle.shifter.ui.ShifterApp;
+
 public class ShifterEngine {
 
-  ArrayList<SubtitleLine> lines, origLines;
-  int searchIndex = 0;
+	ArrayList<SubtitleLine> lines, origLines;
+	int searchIndex = 0;
+	String encodingDetected = null;
+	ShifterApp shifterApp;
 
-  private byte[] openFile(String filename) throws Exception {
-    FileInputStream fis = new FileInputStream(filename);
-    byte[] file = new byte[fis.available()];
-    fis.read(file);
-    fis.close();
-    return file;
-  }
+	public ShifterEngine(ShifterApp shifterApp) {
+		this.shifterApp = shifterApp;
+	}
 
-  public void readFile(String filename, String encoding, String format) throws Exception {
-    origLines = new ArrayList<SubtitleLine>();
-    lines = new ArrayList<SubtitleLine>();
-    Reader reader = new InputStreamReader(new ByteArrayInputStream(openFile(filename)), encoding);
-    BufferedReader br = new BufferedReader(reader);
+	private byte[] openFile(String filename) throws Exception {
+		FileInputStream fis = new FileInputStream(filename);
+		byte[] file = new byte[fis.available()];
+		fis.read(file);
+		fis.close();
+		byte[] res = null;
+		// UTF-8
+		if ((file[0] == (byte) 0xEF) && (file[1] == (byte) 0xBB) && (file[2] == (byte) 0xBF)) {
+			encodingDetected = "UTF-8";
+			int offset = 3;
+			res = new byte[file.length - offset];
+			for (int i = 0; i < file.length - offset; i++) {
+				res[i] = file[i + offset];
+			}
+			// UTF-16BE
+		} else if ((file[0] == (byte) 0xFE) && (file[1] == (byte) 0xFF)) {
+			encodingDetected = "UTF-16BE";
+			int offset = 2;
+			res = new byte[file.length - offset];
+			for (int i = 0; i < file.length - offset; i++) {
+				res[i] = file[i + offset];
+			}
+			// UTF-16LE
+		} else if ((file[0] == (byte) 0xFF) && (file[1] == (byte) 0xFE)) {
+			encodingDetected = "UTF-16LE";
+			int offset = 2;
+			res = new byte[file.length - offset];
+			for (int i = 0; i < file.length - offset; i++) {
+				res[i] = file[i + offset];
+			}
+			// UTF-32BE
+		} else if ((file[0] == (byte) 0x00) && (file[1] == (byte) 0x00) && (file[2] == (byte) 0xFE)
+				&& (file[3] == (byte) 0xFF)) {
+			encodingDetected = "UTF-32BE";
+			int offset = 4;
+			res = new byte[file.length - offset];
+			for (int i = 0; i < file.length - offset; i++) {
+				res[i] = file[i + offset];
+			}
+			// UTF-32LE
+		} else if ((file[0] == (byte) 0xFF) && (file[1] == (byte) 0xFE) && (file[2] == (byte) 0x00)
+				&& (file[3] == (byte) 0x00)) {
+			encodingDetected = "UTF-32LE";
+			int offset = 4;
+			res = new byte[file.length - offset];
+			for (int i = 0; i < file.length - offset; i++) {
+				res[i] = file[i + offset];
+			}
+		}
+		if (res != null) {
+			if (shifterApp != null) {
+				shifterApp.setEncoding(encodingDetected);
+			}
+			return res;
+		}
+		return file;
+	}
 
-    while (br.ready()) {
-      String num = br.readLine();
-      String time = br.readLine();
-      String line = br.readLine();
-      String text = "";
-      while (line != null && !"".equals(line)) {
-        text += line.trim() + "\n";
-        line = br.readLine();
-      }
+	public void readFile(String filename, String encoding, String format) throws Exception {
+		origLines = new ArrayList<SubtitleLine>();
+		lines = new ArrayList<SubtitleLine>();
+		Reader reader = new InputStreamReader(new ByteArrayInputStream(openFile(filename)),
+				encodingDetected != null ? encodingDetected : encoding);
+		BufferedReader br = new BufferedReader(reader);
 
-      SubtitleLine sl = new SubtitleLine();
-      sl.setLineNum(Integer.parseInt(num));
-      sl.setTimeFromTo(time);
-      sl.setText(text);
+		while (br.ready()) {
+			String num = br.readLine();
+			String time = br.readLine();
+			String line = br.readLine();
+			String text = "";
+			while (line != null && !"".equals(line)) {
+				text += line.trim() + "\n";
+				line = br.readLine();
+			}
 
-      // System.out.println(sl.getLineFormated("srt"));
-      origLines.add(sl);
-      lines.add(sl.clone());
-    }
-    br.close();
-  }
+			SubtitleLine sl = new SubtitleLine();
+			sl.setLineNum(Integer.parseInt(num));
+			sl.setTimeFromTo(time);
+			sl.setText(text);
 
-  public void writeFile(String filename, String encoding, String format) throws Exception {
-    Writer writer = new OutputStreamWriter(new FileOutputStream(filename), encoding);
+			// System.out.println(sl.getLineFormated("srt"));
+			origLines.add(sl);
+			lines.add(sl.clone());
+		}
+		br.close();
+	}
 
-    for (SubtitleLine sl : lines) {
-      writer.write(sl.getLineFormated(format));
-    }
+	public void writeFile(String filename, String encoding, String format) throws Exception {
+		Writer writer = new OutputStreamWriter(new FileOutputStream(filename), encoding);
 
-    writer.flush();
-    writer.close();
-  }
+		for (SubtitleLine sl : lines) {
+			writer.write(sl.getLineFormated(format));
+		}
 
-  public void applyShiftMillis(int shift, int index, boolean after) {
-    if (after) {
-      for (int i = index; i < lines.size(); i++) {
-        SubtitleLine sl = lines.get(i);
-        sl.applyShiftMillis(shift);
-      }
-    } else {
-      for (int i = index; i >= 0; i--) {
-        SubtitleLine sl = lines.get(i);
-        sl.applyShiftMillis(shift);
-      }
-    }
-  }
+		writer.flush();
+		writer.close();
+	}
 
-  public void applyShiftMillis(int shift, int[] selectedIndices) {
-    for (int i : selectedIndices) {
-      SubtitleLine sl = lines.get(i);
-      sl.applyShiftMillis(shift);
-    }
-  }
+	public void applyShiftMillis(int shift, int index, boolean after) {
+		if (after) {
+			for (int i = index; i < lines.size(); i++) {
+				SubtitleLine sl = lines.get(i);
+				sl.applyShiftMillis(shift);
+			}
+		} else {
+			for (int i = index; i >= 0; i--) {
+				SubtitleLine sl = lines.get(i);
+				sl.applyShiftMillis(shift);
+			}
+		}
+	}
 
-  public String getFileText(String format) {
-    String tmp = "";
-    for (SubtitleLine sl : lines) {
-      tmp += sl.getLineFormated(format);
-    }
-    return tmp;
-  }
+	public void applyShiftMillis(int shift, int[] selectedIndices) {
+		for (int i : selectedIndices) {
+			SubtitleLine sl = lines.get(i);
+			sl.applyShiftMillis(shift);
+		}
+	}
 
-  public boolean isFileOpen() {
-    return lines != null && !lines.isEmpty();
-  }
+	public String getFileText(String format) {
+		String tmp = "";
+		for (SubtitleLine sl : lines) {
+			tmp += sl.getLineFormated(format);
+		}
+		return tmp;
+	}
 
-  public List<SubtitleLine> getLines() {
-    return lines;
-  }
+	public boolean isFileOpen() {
+		return lines != null && !lines.isEmpty();
+	}
 
-  public SubtitleLine[] getLinesAsArray() {
-    return lines.toArray(new SubtitleLine[0]);
-  }
+	public List<SubtitleLine> getLines() {
+		return lines;
+	}
 
-  public List<SubtitleLine> getOrigLines() {
-    return origLines;
-  }
-  
-  public SubtitleLine[] getOrigLinesAsArray() {
-    return origLines.toArray(new SubtitleLine[0]);
-  }
+	public SubtitleLine[] getLinesAsArray() {
+		return lines.toArray(new SubtitleLine[0]);
+	}
 
-  public int search(String searchStr) {
+	public List<SubtitleLine> getOrigLines() {
+		return origLines;
+	}
 
-    for (int i = searchIndex; i < lines.size(); i++) {
-      searchIndex++;
-      SubtitleLine sl = lines.get(i);
-      if (sl.contains(searchStr))
-        return i;
-    }
+	public SubtitleLine[] getOrigLinesAsArray() {
+		return origLines.toArray(new SubtitleLine[0]);
+	}
 
-    searchIndex = 0;
-    return -1;
-  }
+	public int search(String searchStr) {
 
-  public void insertSubtitleLine(int index, SubtitleLine sl) {
-    int orig = lines.get(index).getLineNum();
-    sl.setLineNum(orig);
-    for (int i = index; i < lines.size(); i++) {
-      lines.get(i).incLineNum();
-    }
-    lines.add(index, sl);
-  }
+		for (int i = searchIndex; i < lines.size(); i++) {
+			searchIndex++;
+			SubtitleLine sl = lines.get(i);
+			if (sl.contains(searchStr))
+				return i;
+		}
 
-  public void deleteSubtitle(int index) {
-    for (int i = index; i < lines.size(); i++) {
-      lines.get(i).decLineNum();
-    }
-    lines.remove(index);
-  }
+		searchIndex = 0;
+		return -1;
+	}
 
-  public void translateLine(int lineNum, String srcLang, String destLang) throws Exception {
-    String line = lines.get(lineNum).getText();
-    String res = translateTextWithGoogleAPIs(line, srcLang, destLang);
-  }
+	public void insertSubtitleLine(int index, SubtitleLine sl) {
+		int orig = lines.get(index).getLineNum();
+		sl.setLineNum(orig);
+		for (int i = index; i < lines.size(); i++) {
+			lines.get(i).incLineNum();
+		}
+		lines.add(index, sl);
+	}
 
-  public String translateTextWithGoogleAPIs(String line, String srcLang, String trgLang) throws Exception {
-    URL url = new URL("http://translate.googleapis.com/translate_a/single?client=gtx&sl=" + srcLang + "&tl=" + trgLang + "&dt=t&q=" + line);
-    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-    con.setRequestMethod("GET");
+	public void deleteSubtitle(int index) {
+		for (int i = index; i < lines.size(); i++) {
+			lines.get(i).decLineNum();
+		}
+		lines.remove(index);
+	}
 
-    int rc = con.getResponseCode();
+	public void translateLine(int lineNum, String srcLang, String destLang) throws Exception {
+		String line = lines.get(lineNum).getText();
+		String res = translateTextWithGoogleAPIs(line, srcLang, destLang);
+	}
 
-    String response = "";
+	public String translateTextWithGoogleAPIs(String line, String srcLang, String trgLang) throws Exception {
+		URL url = new URL("http://translate.googleapis.com/translate_a/single?client=gtx&sl=" + srcLang + "&tl="
+				+ trgLang + "&dt=t&q=" + line);
+		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setRequestMethod("GET");
 
-    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-    while ((line = br.readLine()) != null) {
-      response += line;
-    }
+		int rc = con.getResponseCode();
 
-    return response;
-  }
+		String response = "";
 
-  public static void main(String[] args) throws Exception {
-    ShifterEngine e = new ShifterEngine();
-    e.translateTextWithGoogleAPIs("just+test", "en", "cz");
-    /*
-     * String filename = args[0]; String encoding = args[1]; String format =
-     * args[2]; int shift = Integer.parseInt(args[3]); ShifterEngine a = new
-     * ShifterEngine(); a.readFile(filename, encoding, format);
-     * a.applyShiftMillis(shift, 0, true); a.writeFile(filename + ".new", encoding,
-     * format);
-     */
-  }
+		BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+		while ((line = br.readLine()) != null) {
+			response += line;
+		}
+
+		return response;
+	}
+
+	public static void main(String[] args) throws Exception {
+		ShifterEngine e = new ShifterEngine(null);
+		e.translateTextWithGoogleAPIs("just+test", "en", "cz");
+		/*
+		 * String filename = args[0]; String encoding = args[1]; String format =
+		 * args[2]; int shift = Integer.parseInt(args[3]); ShifterEngine a = new
+		 * ShifterEngine(); a.readFile(filename, encoding, format);
+		 * a.applyShiftMillis(shift, 0, true); a.writeFile(filename + ".new", encoding,
+		 * format);
+		 */
+	}
 }

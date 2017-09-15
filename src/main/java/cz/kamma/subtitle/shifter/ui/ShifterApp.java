@@ -175,7 +175,7 @@ public class ShifterApp {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		app = new ShifterEngine();
+		app = new ShifterEngine(this);
 		try {
 			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
 		} catch (Exception e) {
@@ -286,19 +286,19 @@ public class ShifterApp {
 		saveFileBtn = new JButton("Save Subtitles");
 		panel_5.add(saveFileBtn);
 		saveFileBtn.setEnabled(false);
-		
+
 		panel_6 = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel_6.getLayout();
 		panel_2.add(panel_6);
-		
-				translationModeBtn = new JButton("Translate");
-				panel_6.add(translationModeBtn);
-				translationModeBtn.setEnabled(false);
-				translationModeBtn.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent arg0) {
-						toggleTranslationMode();
-					}
-				});
+
+		translationModeBtn = new JButton("Translate");
+		panel_6.add(translationModeBtn);
+		translationModeBtn.setEnabled(false);
+		translationModeBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				toggleTranslationMode();
+			}
+		});
 		saveFileBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				saveFileAction();
@@ -357,39 +357,39 @@ public class ShifterApp {
 				}
 			}
 		});
-		
+
 		origList = new JList<>();
 		origList.setCellRenderer(new MyListCellRenderer());
 		origList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		origList.setFont(new Font("Courier New", Font.BOLD, 12));
 		origList.setDropTarget(new DropTarget() {
-      private static final long serialVersionUID = 1L;
+			private static final long serialVersionUID = 1L;
 
-      public synchronized void drop(DropTargetDropEvent evt) {
-        try {
-          evt.acceptDrop(DnDConstants.ACTION_COPY);
-          List<File> droppedFiles = (List<File>) evt.getTransferable()
-              .getTransferData(DataFlavor.javaFileListFlavor);
-          for (File file : droppedFiles) {
-            reloadFile(file.getAbsolutePath());
-          }
-        } catch (Exception ex) {
-          JOptionPane.showMessageDialog(frmSubtitleshifter,
-              "Error occured while Drag'n'Drop file.\nError: " + ex.getMessage(), "Cannot open file",
-              JOptionPane.ERROR_MESSAGE);
-        }
-      }
-    });
+			public synchronized void drop(DropTargetDropEvent evt) {
+				try {
+					evt.acceptDrop(DnDConstants.ACTION_COPY);
+					List<File> droppedFiles = (List<File>) evt.getTransferable()
+							.getTransferData(DataFlavor.javaFileListFlavor);
+					for (File file : droppedFiles) {
+						reloadFile(file.getAbsolutePath());
+					}
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(frmSubtitleshifter,
+							"Error occured while Drag'n'Drop file.\nError: " + ex.getMessage(), "Cannot open file",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
 
 		scrollPane = new JScrollPane(origList);
 		scrollPane2 = new JScrollPane(subList);
 		splitPane.setLeftComponent(scrollPane);
-		
+
 		lblNewLabel_3 = new JLabel("Original Subtitles");
 		lblNewLabel_3.setHorizontalAlignment(SwingConstants.CENTER);
 		scrollPane.setColumnHeaderView(lblNewLabel_3);
 		splitPane.setRightComponent(scrollPane2);
-		
+
 		lblNewLabel_4 = new JLabel("Modified Subtitles");
 		lblNewLabel_4.setHorizontalAlignment(SwingConstants.CENTER);
 		scrollPane2.setColumnHeaderView(lblNewLabel_4);
@@ -435,7 +435,7 @@ public class ShifterApp {
 
 	protected void toggleTranslationMode() {
 		try {
-			//app.translateAll();
+			// app.translateAll();
 			subList.setListData(app.getLinesAsArray());
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(frmSubtitleshifter, "Cannot translate subtitles.\nError: " + e.getMessage(),
@@ -546,8 +546,10 @@ public class ShifterApp {
 			subList.clearSelection();
 			JOptionPane.showMessageDialog(frmSubtitleshifter, "String not found", "Search result",
 					JOptionPane.INFORMATION_MESSAGE);
-		} else
+		} else {
 			subList.setSelectedIndex(index);
+			subList.ensureIndexIsVisible(index);
+		}
 	}
 
 	protected void reloadFile(String filename) {
@@ -631,6 +633,11 @@ public class ShifterApp {
 				setBackground(Color.YELLOW);
 			return this;
 		}
+	}
+
+	public void setEncoding(String encodingDetected) {
+		encodingCB.setSelectedItem(encodingDetected);
+		targetEncCB.setSelectedItem(encodingDetected);
 	}
 
 }
