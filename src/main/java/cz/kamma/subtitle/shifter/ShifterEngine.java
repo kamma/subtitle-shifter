@@ -205,6 +205,8 @@ public class ShifterEngine {
     URL url = new URL("http://translate.googleapis.com/translate_a/single?client=gtx&sl=" + srcLang + "&tl=" + trgLang + "&dt=t&q=" + URLEncoder.encode(line, "UTF-8"));
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     con.setRequestMethod("GET");
+    con.addRequestProperty("Host", "translate.googleapis.com");
+    con.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36");
 
     int rc = con.getResponseCode();
 
