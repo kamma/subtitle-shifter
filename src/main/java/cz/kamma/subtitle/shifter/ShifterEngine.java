@@ -18,11 +18,9 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import cz.kamma.subtitle.shifter.ui.ProgressBarUpdator;
 import cz.kamma.subtitle.shifter.ui.ShifterApp;
 
 public class ShifterEngine {
@@ -220,9 +218,11 @@ public class ShifterEngine {
         }
       };
       Authenticator.setDefault(authenticator);
+    }
+    if (props.get("shifter.proxy.host")!=null && props.get("shifter.proxy.host").length()>0) {
       proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(props.get("shifter.proxy.host"), Integer.parseInt(props.get("shifter.proxy.port"))));
     }
-    URL url = new URL("http://translate.googleapis.com/translate_a/single?client=gtx&sl=" + srcLang + "&tl=" + trgLang + "&dt=t&q=" + URLEncoder.encode(line, "UTF-8"));
+    URL url = new URL("http://translate.googleapis.com/translate_a/single?client=gtx&sl=" + srcLang + "&tl=" + trgLang + "&dt=t&q=" + URLEncoder.encode(line.trim(), "UTF-8"));
     HttpURLConnection con = (HttpURLConnection) (proxy!=null?url.openConnection(proxy):url.openConnection());
     con.setRequestMethod("GET");
     con.addRequestProperty("Host", "translate.googleapis.com");
@@ -244,7 +244,7 @@ public class ShifterEngine {
     Pattern p = Pattern.compile("\"([^\"]*)\"");
     Matcher m = p.matcher(response);
     while (m.find()) {
-      return m.group(1);
+      return m.group(1).trim().concat("\n");
     }
 
     return null;
@@ -255,7 +255,7 @@ public class ShifterEngine {
     e.translateTextWithGoogleAPIs("just+test", "en", "cs");
   }
 
-  public Runnable translateLine(SubtitleLine sl, ProgressBarUpdator ju) throws Exception {
+  public Runnable translateLine(SubtitleLine sl) throws Exception {
     return new Runnable() {
       @Override
       public void run() {
@@ -266,7 +266,7 @@ public class ShifterEngine {
             sl.setText(trans);
         } catch (Exception e) {
         }
-        ju.addValue();
+        shifterApp.getProgressUpdater().addValue();
       }
     };
   }

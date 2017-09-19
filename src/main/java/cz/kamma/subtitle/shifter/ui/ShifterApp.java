@@ -95,6 +95,8 @@ public class ShifterApp {
   private JPanel panel_9;
   private JPanel panel_10;
 
+  private ProgressBarUpdater progressUpdater;
+
   /**
    * Launch the application.
    */
@@ -441,10 +443,10 @@ public class ShifterApp {
     try {
       translationModeBtn.setEnabled(false);
       final ExecutorService threadPool = Executors.newFixedThreadPool(10);
-      ProgressBarUpdator ju = new ProgressBarUpdator(progressBar, translationModeBtn, app.getLines().size());
-      new Thread(ju).start();
+      progressUpdater = new ProgressBarUpdater(app.getLines().size());
+      new Thread(progressUpdater).start();
       for (SubtitleLine sl : app.getLines()) {
-        threadPool.submit(app.translateLine(sl, ju));
+        threadPool.submit(app.translateLine(sl));
       }
     } catch (Exception e) {
       JOptionPane.showMessageDialog(frmSubtitleshifter, "Cannot translate subtitles.\nError: " + e.getMessage(), "Translation error", JOptionPane.ERROR_MESSAGE);
@@ -633,8 +635,38 @@ public class ShifterApp {
     targetEncCB.setSelectedItem(encodingDetected);
   }
 
-  public JProgressBar getProgressBar() {
-    return progressBar;
+  public class ProgressBarUpdater implements Runnable {
+    public int value = 0;
+
+    public ProgressBarUpdater(int maximum) {
+      progressBar.setMinimum(0);
+      progressBar.setMaximum(maximum);
+      progressBar.setValue(0);
+    }
+
+    public void run() {
+      do {
+        progressBar.setValue(value);
+        try {
+          Thread.sleep(10);
+        } catch (java.lang.InterruptedException ex) {
+          ex.printStackTrace();
+        }
+      } while (value < progressBar.getMaximum());
+      progressBar.setValue(0);
+      translationModeBtn.setEnabled(true);
+      saveFileBtn.setEnabled(true);
+      subList.setListData(app.getLinesAsArray());
+      subList.repaint();
+    }
+
+    public synchronized void addValue() {
+      value += 1;
+    }
+  }
+
+  public ProgressBarUpdater getProgressUpdater() {
+    return progressUpdater;
   }
 
 }
