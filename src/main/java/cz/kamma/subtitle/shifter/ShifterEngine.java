@@ -8,11 +8,17 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -204,8 +210,20 @@ public class ShifterEngine {
   }
 
   public String translateTextWithGoogleAPIs(String line, String srcLang, String trgLang) throws Exception {
+    Proxy proxy = null;
+    Map<String, String> props = System.getenv();
+    if (props.get("shifter.proxy.user")!=null && props.get("shifter.proxy.user").length()>0) {
+      Authenticator authenticator = new Authenticator() {
+
+        public PasswordAuthentication getPasswordAuthentication() {
+          return (new PasswordAuthentication(props.get("shifter.proxy.user"), props.get("shifter.proxy.password").toCharArray()));
+        }
+      };
+      Authenticator.setDefault(authenticator);
+      proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(props.get("shifter.proxy.host"), Integer.parseInt(props.get("shifter.proxy.port"))));
+    }
     URL url = new URL("http://translate.googleapis.com/translate_a/single?client=gtx&sl=" + srcLang + "&tl=" + trgLang + "&dt=t&q=" + URLEncoder.encode(line, "UTF-8"));
-    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    HttpURLConnection con = (HttpURLConnection) (proxy!=null?url.openConnection(proxy):url.openConnection());
     con.setRequestMethod("GET");
     con.addRequestProperty("Host", "translate.googleapis.com");
     con.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36");
@@ -222,11 +240,11 @@ public class ShifterEngine {
     while ((line = br.readLine()) != null) {
       response += line;
     }
-    
+
     Pattern p = Pattern.compile("\"([^\"]*)\"");
     Matcher m = p.matcher(response);
     while (m.find()) {
-        return m.group(1);
+      return m.group(1);
     }
 
     return null;
@@ -244,10 +262,9 @@ public class ShifterEngine {
         try {
           String orig = sl.getText();
           String trans = translateTextWithGoogleAPIs(orig, "en", "cs");
-          if (trans!=null && trans.length()>0)
+          if (trans != null && trans.length() > 0)
             sl.setText(trans);
         } catch (Exception e) {
-          System.out.println(e.getMessage());
         }
         ju.addValue();
       }
