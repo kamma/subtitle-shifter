@@ -11,9 +11,13 @@ binary distribution is located in /target directory
 To use atomatic translation with Google Translate behind proxy, set these environment properties (windows: set, linux/unix: export)
 
 shifter.proxy.host
+
 shifter.proxy.port
+
 shifter.proxy.user
+
 shifter.proxy.password
+
 
 create eclipse project
 ======================
