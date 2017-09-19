@@ -13,6 +13,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import cz.kamma.subtitle.shifter.ui.ProgressBarUpdator;
 import cz.kamma.subtitle.shifter.ui.ShifterApp;
@@ -211,18 +213,23 @@ public class ShifterEngine {
     int rc = con.getResponseCode();
 
     if (rc != 200) {
-      System.out.println("Cannot connect to Google translate. (HTTP " + rc + ")");
       throw new Exception("Cannot connect to Google translate. (HTTP " + rc + ")");
     }
 
     String response = "";
 
-    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()));
+    BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
     while ((line = br.readLine()) != null) {
       response += line;
     }
+    
+    Pattern p = Pattern.compile("\"([^\"]*)\"");
+    Matcher m = p.matcher(response);
+    while (m.find()) {
+        return m.group(1);
+    }
 
-    return response;
+    return null;
   }
 
   public static void main(String[] args) throws Exception {
